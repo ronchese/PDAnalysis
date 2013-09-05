@@ -1,0 +1,18 @@
+<use   name="root"/>
+<use   name="boost"/>
+<use   name="rootcintex"/>
+<use   name="FWCore/FWLite"/>
+<use   name="DataFormats/FWLite"/>
+<use   name="DataFormats/Luminosity"/>
+<use   name="FWCore/PythonParameterSet"/>
+<use   name="CommonTools/Utils"/>
+<use   name="PhysicsTools/FWLite"/>
+<use   name="PhysicsTools/Utilities"/>
+<use   name="PhysicsTools/SelectorUtils"/>
+<use   name="NtuTool/Common"/>
+<use   name="NtuTool/Read"/>
+<use   name="PDAnalysis/NtuPAT"/>
+<environment>
+  <bin   file="pd.cc" name="pd"></bin>
+  <bin   file="PDAnalyzerInstance.cc" name="treeAnalyze"></bin>
+</environment>
