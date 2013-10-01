@@ -18,6 +18,7 @@ class PDAnalyzer: public PDAnalyzerUtil {
   void book();
 
   // functions called for each event
+//  virtual void getEvPre( int ientry );
   virtual bool analyze( int entry, int event_file );
   virtual bool analyze( int entry, int event_file, int event_tot );
 

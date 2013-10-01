@@ -65,6 +65,13 @@ void PDAnalyzer::book() {
 }
 
 
+//void PDAnalyzer::getEvPre( int ientry ) {
+//  b_nMuons->GetEntry( ientry );
+//  b_muoPt ->GetEntry( ientry );
+//  return;
+//}
+
+
 bool PDAnalyzer::analyze( int entry, int event_file ) {
   bool acceptEv = analyze( entry, event_file, analyzedEvts++ );
   if ( acceptEv ) acceptedEvts++;
@@ -92,9 +99,6 @@ bool PDAnalyzer::analyze( int entry, int event_file, int event_tot ) {
 
   flag = true;
 
-//  getEntry( b_nMuons, entry );
-//  getEntry( b_muoPt , entry );
-
   int iMuon;
   float ptmu;
   float ptmumax = -1.0;
@@ -114,6 +118,11 @@ bool PDAnalyzer::analyze( int entry, int event_file, int event_tot ) {
   }
   hptmumax->Fill( ptmumax );
   hptmu2nd->Fill( ptmu2nd );	
+
+//  if ( ptmumax > 30.0 ) {
+//    getEntry( b_nJets, entry );
+//    cout << nJets << " jets" << endl;
+//  }
 
   return flag;
 

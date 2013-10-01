@@ -42,7 +42,7 @@ namespace reco {
 class HLTConfigProvider;
 
 class PDPATToNtuple: public PDAnalyzer,
-                      public TreeWriter {
+                     public TreeWriter {
 
  public:
 

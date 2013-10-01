@@ -4,11 +4,11 @@
 #include "NtuTool/Read/bin/treeAnalyze.cc"
 
 class PDAnalyzerInstance: public PDAnalyzer, public TreeReader {
-  virtual void getEntry( int ientry );
+  virtual bool getEntry( int ientry );
 };
 
-void PDAnalyzerInstance::getEntry( int ientry ) {
-  PDAnalyzer::getEntry( ientry );
+bool PDAnalyzerInstance::getEntry( int ientry ) {
+  return PDAnalyzer::getEntry( ientry );
 }
 
 static PDAnalyzerInstance ai;

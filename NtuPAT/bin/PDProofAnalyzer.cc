@@ -130,7 +130,7 @@ Bool_t PDProofAnalyzer::Process( Long64_t ientry ) {
 
    // *** 1. *** Tell the tree to load the data for this entry:
   cout << "getEntry " << ientry << endl;
-  getEntry( ientry );
+  if ( !getEntry( ientry ) ) return false;
 
   // *** 2. *** Do the actual analysis
 

@@ -10,8 +10,8 @@
 // The class with the tree definition must inherit from "TreeWrapper"
 
 class PDNtuple: public virtual PDNtupleBranch<TreeWrapper>,
-                 public PDUtil,
-                 public virtual TreeWrapper {
+                public PDUtil,
+                public virtual TreeWrapper {
 
  public:
 

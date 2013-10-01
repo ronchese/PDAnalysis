@@ -146,12 +146,18 @@ void PDAnalyzerUtil::beginJob() {
 }
 
 
-void PDAnalyzerUtil::getEntry( int ientry ) {
+bool PDAnalyzerUtil::getEntry( int ientry ) {
 //  cout << "PDAnalyzer::getEntry" << endl;
   b_runNumber  ->GetEntry( ientry );
   b_lumiSection->GetEntry( ientry );
   b_eventNumber->GetEntry( ientry );
-  if ( !find( runNumber, eventNumber ) ) return;
+  if ( !find( runNumber, eventNumber ) ) return false;
+  getEvPre( ientry );
+  return true;
+}
+
+
+void PDAnalyzerUtil::getEvPre( int ientry ) {
   currentTree->GetEntry( ientry );
   return;
 }

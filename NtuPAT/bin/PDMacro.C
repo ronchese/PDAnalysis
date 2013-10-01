@@ -67,7 +67,7 @@ void PDMacro( const std::string& dataset ) {
     for ( iEvt = 0; iEvt < nEvt; ++iEvt ) {
       if ( ( endAna = ( ( nMax > 0 ) &&
                         ( ntu->analyzedEvents() >= nMax ) ) ) ) break;
-      ntu->getEntry( iEvt );
+      if ( !ntu->getEntry( iEvt ) ) continue;
       ntu->analyze( iEvt, iEvt );
     }
     delete c;
