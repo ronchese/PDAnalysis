@@ -786,7 +786,6 @@ void PDPATToNtuple::fillElectrons() {
 
   // store electrons info
 
-  return;
   int iObj;
   int nObj = nElectrons = ( vElectrons ? electrons->size() : 0 );
   elePt     ->resize( nObj );
@@ -862,7 +861,7 @@ void PDPATToNtuple::fillElectrons() {
 //      ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, absEta,
 //      ElectronEffectiveArea::kEleEAData2011 );
 
-    eleID     ->at( iObj ) = electron.electronID( "eidMediumMC" );
+    eleID     ->at( iObj ) = 0;//electron.electronID( "eidMediumMC" );
     eleConsCha->at( iObj ) = electron.isGsfCtfScPixChargeConsistent();
     eleEBEEGap->at( iObj ) = electron.isEBEEGap();
     eleDb     ->at( iObj ) = electron.dB();
