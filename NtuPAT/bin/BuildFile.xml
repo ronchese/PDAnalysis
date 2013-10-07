@@ -13,6 +13,6 @@
 <use   name="NtuTool/Read"/>
 <use   name="PDAnalysis/NtuPAT"/>
 <environment>
-  <bin   file="pd.cc" name="pd"></bin>
+  <bin   file="pdFWLite.cc" name="pdFWLite"></bin>
   <bin   file="PDAnalyzerInstance.cc" name="treeAnalyze"></bin>
 </environment>

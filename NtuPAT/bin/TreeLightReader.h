@@ -19,6 +19,36 @@ class TreeLightReader {
   int analyzedEvents() { return analyzedEvts; }
   int acceptedEvents() { return acceptedEvts; }
 
+
+  virtual void setConfiguration( const std::string& file ) {
+    std::ifstream cfg( file.c_str() );
+    int length;
+    int lenMax = 1000;
+    char* line = new char[lenMax];
+    char* lptr;
+    while ( cfg.getline( line, lenMax ) ) {
+      lptr = line;
+      while ( *lptr == ' ' ) ++lptr;
+      if    ( *lptr == '#' ) continue;
+      std::string key( lptr );
+      length = key.find( " " );
+      if ( length < 0 ) {
+        std::cout << "invalid configuration input: " << line << std::endl;
+        continue;
+      }
+      key = key.substr( 0, length );
+      lptr += length;
+      while ( *lptr == ' ' ) ++lptr;
+      std::string val( lptr );
+      length = val.find( " " );
+      if ( length >= 0 )
+	val = val.substr( 0, length );
+      setUserParameter( key, val );
+    }
+    delete[] line;
+    return;
+  }
+
   virtual void setUserParameter( const std::string& key,
                                  const std::string& val ) {
     std::map<std::string,std::string>::iterator
