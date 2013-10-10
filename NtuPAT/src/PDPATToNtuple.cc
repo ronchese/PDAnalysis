@@ -1635,16 +1635,16 @@ void PDPATToNtuple::fillGenParticles() {
     vector<int>& mList = motherTable[iObj];
     mList.resize( nM, -1 );
     int id;
-    cout << iObj << " has " << nM << " mothers:";// << endl;
+//    cout << iObj << " has " << nM << " mothers:";// << endl;
     for ( iM = 0; iM < nM; ++iM ) {
       map<const Candidate*,int>::const_iterator iter = genMap.find(
                                                        gen.mother( iM ) );
       map<const Candidate*,int>::const_iterator iend = genMap.end();
       if ( iter != iend ) mList[iM] = iter->second;
-      id = ( iter != iend ? iter->second : -1 );
-      cout << " " << id;
+//      id = ( iter != iend ? iter->second : -1 );
+//      cout << " " << id;
     }
-    cout << endl;
+//    cout << endl;
     sort( mList.begin(), mList.end() );
     if ( mList.size() ) genMother->at( iObj ) = mList[0];
 //    cout << "gen particle: " << iObj << " "
