@@ -69,6 +69,7 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
   TBranch* b_mEt;
   TBranch* b_mEx;
   TBranch* b_mEy;
+  TBranch* b_mEsign;
 
   // muons
   void setBranches_muons();
@@ -257,6 +258,7 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
   TBranch* b_genId;
   TBranch* b_genStatus;
   TBranch* b_genMother;
+  TBranch* b_genPartner;
   TBranch* b_genPt;
   TBranch* b_genEta;
   TBranch* b_genPhi;

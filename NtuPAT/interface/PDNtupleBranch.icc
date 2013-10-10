@@ -95,33 +95,33 @@ template <class T>
 void PDNtupleBranch<T>::setBranches_bspot() {
   // beam spot
   this->setBranch( "bwX"            , &  bwX            ,
-                   "bwX/D"          , &b_bwX             );
+                   "bwX/F"          , &b_bwX             );
   this->setBranch( "bwY"            , &  bwY            ,
-                   "bwY/D"          , &b_bwY             );
+                   "bwY/F"          , &b_bwY             );
   this->setBranch( "bwXError"       , &  bwXError       ,
-                   "bwXError/D"     , &b_bwXError        );
+                   "bwXError/F"     , &b_bwXError        );
   this->setBranch( "bwYError"       , &  bwYError       ,
-                   "bwYError/D"     , &b_bwYError        );
+                   "bwYError/F"     , &b_bwYError        );
   this->setBranch( "bsX"            , &  bsX            ,
-                   "bsX/D"          , &b_bsX             );
+                   "bsX/F"          , &b_bsX             );
   this->setBranch( "bsY"            , &  bsY            ,
-                   "bsY/D"          , &b_bsY             );
+                   "bsY/F"          , &b_bsY             );
   this->setBranch( "bsZ"            , &  bsZ            ,
-                   "bsZ/D"          , &b_bsZ             );
+                   "bsZ/F"          , &b_bsZ             );
   this->setBranch( "bsXError"       , &  bsXError       ,
-                   "bsXError/D"     , &b_bsXError        );
+                   "bsXError/F"     , &b_bsXError        );
   this->setBranch( "bsYError"       , &  bsYError       ,
-                   "bsYError/D"     , &b_bsYError        );
+                   "bsYError/F"     , &b_bsYError        );
   this->setBranch( "bsZError"       , &  bsZError       ,
-                   "bsZError/D"     , &b_bsZError        );
+                   "bsZError/F"     , &b_bsZError        );
   this->setBranch( "bsdXdZ"         , &  bsdXdZ         ,
-                   "bsdXdZ/D"       , &b_bsdXdZ          );
+                   "bsdXdZ/F"       , &b_bsdXdZ          );
   this->setBranch( "bsdYdZ"         , &  bsdYdZ         ,
-                   "bsdYdZ/D"       , &b_bsdYdZ          );
+                   "bsdYdZ/F"       , &b_bsdYdZ          );
   this->setBranch( "bsdXdZError"    , &  bsdXdZError    ,
-                   "bsdXdZError/D"  , &b_bsdXdZError     );
+                   "bsdXdZError/F"  , &b_bsdXdZError     );
   this->setBranch( "bsdYdZError"    , &  bsdYdZError    ,
-                   "bsdYdZError/D"  , &b_bsdYdZError     );
+                   "bsdYdZError/F"  , &b_bsdYdZError     );
   return;
 }
 
@@ -129,11 +129,13 @@ template <class T>
 void PDNtupleBranch<T>::setBranches_met() {
   // met
   this->setBranch( "mEt"            , &  mEt            ,
-                   "mEt/D"          , &b_mEt             );
+                   "mEt/F"          , &b_mEt             );
   this->setBranch( "mEx"            , &  mEx            ,
-                   "mEx/D"          , &b_mEx             );
+                   "mEx/F"          , &b_mEx             );
   this->setBranch( "mEy"            , &  mEy            ,
-                   "mEy/D"          , &b_mEy             );
+                   "mEy/F"          , &b_mEy             );
+  this->setBranch( "mEsign"         , &  mEsign         ,
+                   "mEsign/F"       , &b_mEsign          );
   return;
 }
 
@@ -559,6 +561,8 @@ void PDNtupleBranch<T>::setBranches_gen() {
                    size, 99         , &b_genStatus       );
   this->setBranch( "genMother"      , &  genMother      ,
                    size, 99         , &b_genMother       );
+  this->setBranch( "genPartner"     , &  genPartner     ,
+                   size, 99         , &b_genPartner      );
   if ( use_gen_sphe ) {
   this->setBranch( "genPt"          , &  genPt          ,
                    size, 99         , &b_genPt           );

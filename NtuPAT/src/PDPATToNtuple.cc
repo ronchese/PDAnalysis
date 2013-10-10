@@ -648,9 +648,10 @@ void PDPATToNtuple::fillMet() {
 
   // store mEt info
 
-  mEt = mets->at( 0 ).pt();
-  mEx = mets->at( 0 ).px();
-  mEy = mets->at( 0 ).py();
+  mEt    = mets->at( 0 ).pt();
+  mEx    = mets->at( 0 ).px();
+  mEy    = mets->at( 0 ).py();
+  mEsign = mets->at( 0 ).mEtSig();
 
   return;
 
@@ -1584,18 +1585,19 @@ void PDPATToNtuple::fillGenParticles() {
 
   int iObj;
   int nObj = ( vGen ? particles->size() : 0 );
-  genId    ->resize( nObj );
-  genStatus->resize( nObj );
-  genMother->resize( nObj );
-  genPt    ->resize( nObj );
-  genEta   ->resize( nObj );
-  genPhi   ->resize( nObj );
-  genPx    ->resize( nObj );
-  genPy    ->resize( nObj );
-  genPz    ->resize( nObj );
-  genE     ->resize( nObj );
-  genCharge->resize( nObj );
-  genMass  ->resize( nObj );
+  genId     ->resize( nObj );
+  genStatus ->resize( nObj );
+  genMother ->resize( nObj );
+  genPartner->resize( nObj );
+  genPt     ->resize( nObj );
+  genEta    ->resize( nObj );
+  genPhi    ->resize( nObj );
+  genPx     ->resize( nObj );
+  genPy     ->resize( nObj );
+  genPz     ->resize( nObj );
+  genE      ->resize( nObj );
+  genCharge ->resize( nObj );
+  genMass   ->resize( nObj );
   if ( !vGen ) {
     cout << "invalid particles" << endl;
     return;
@@ -1608,32 +1610,105 @@ void PDPATToNtuple::fillGenParticles() {
     const GenParticle& gen = particles->at( iObj );
     genMap.insert( make_pair( &gen, iObj ) );
 
-    genId    ->at( iObj ) = gen.pdgId();
-    genStatus->at( iObj ) = gen.status();
-    genMother->at( iObj ) = -1;//gen.mother();
-    genPt    ->at( iObj ) = gen.pt    ();
-    genEta   ->at( iObj ) = gen.eta   ();
-    genPhi   ->at( iObj ) = gen.phi   ();
-    genPx    ->at( iObj ) = gen.px    ();
-    genPy    ->at( iObj ) = gen.py    ();
-    genPz    ->at( iObj ) = gen.pz    ();
-    genE     ->at( iObj ) = gen.energy();
-    genCharge->at( iObj ) = gen.charge();
-    genMass  ->at( iObj ) = gen.mass  ();
+    genId     ->at( iObj ) = gen.pdgId();
+    genStatus ->at( iObj ) = gen.status();
+    genMother ->at( iObj ) = -1;
+    genPartner->at( iObj ) = -1;
+    genPt     ->at( iObj ) = gen.pt    ();
+    genEta    ->at( iObj ) = gen.eta   ();
+    genPhi    ->at( iObj ) = gen.phi   ();
+    genPx     ->at( iObj ) = gen.px    ();
+    genPy     ->at( iObj ) = gen.py    ();
+    genPz     ->at( iObj ) = gen.pz    ();
+    genE      ->at( iObj ) = gen.energy();
+    genCharge ->at( iObj ) = gen.charge();
+    genMass   ->at( iObj ) = gen.mass  ();
 
   }
 
+  vector< vector<int> > motherTable;
+  motherTable.resize( nObj );
   for ( iObj = 0; iObj < nObj; ++iObj ) {
     const GenParticle& gen = particles->at( iObj );
-    map<const Candidate*,int>::const_iterator iter = genMap.find(
-                                                            gen.mother() );
-    map<const Candidate*,int>::const_iterator iend = genMap.end();
-    if ( iter != iend ) genMother->at( iObj ) = iter->second;
+    int iM;
+    int nM = gen.numberOfMothers();
+    vector<int>& mList = motherTable[iObj];
+    mList.resize( nM, -1 );
+    int id;
+    cout << iObj << " has " << nM << " mothers:";// << endl;
+    for ( iM = 0; iM < nM; ++iM ) {
+      map<const Candidate*,int>::const_iterator iter = genMap.find(
+                                                       gen.mother( iM ) );
+      map<const Candidate*,int>::const_iterator iend = genMap.end();
+      if ( iter != iend ) mList[iM] = iter->second;
+      id = ( iter != iend ? iter->second : -1 );
+      cout << " " << id;
+    }
+    cout << endl;
+    sort( mList.begin(), mList.end() );
+    if ( mList.size() ) genMother->at( iObj ) = mList[0];
 //    cout << "gen particle: " << iObj << " "
 //                             << &(particles->at( iObj )) << " "
 //                             << &gen << " " << genMother->at( iObj ) << " "
 //                             << gen.mother() << endl;
   }
+
+  map<int,int> motherMap;
+  map< int, vector<int> > motherListMap;
+  for ( iObj = 0; iObj < nObj; ++iObj ) {
+    vector<int>& mList = motherTable[iObj];
+    if ( !mList.size() ) continue;
+    int fm = mList[0];
+    motherMap[fm] = iObj;
+    motherListMap[fm].push_back( iObj );
+  }
+
+  map<int,int>::const_iterator m_iter = motherMap.begin();
+  map<int,int>::const_iterator m_iend = motherMap.end();
+  int iMot;
+  while ( m_iter != m_iend ) {
+    const pair<int,int>& entry = *m_iter++;
+    iMot = entry.first;
+    iObj = entry.second;
+    const vector<int>& mList = motherTable[iObj];
+    int next;
+    int iM;
+    int nM = mList.size();
+    for ( iM = 1; iM < nM; ++iM ) {
+      genPartner->at( iMot ) = next = mList[iM];
+      iMot = next;
+    }
+  }
+
+/*
+// debugging part
+  map< int, vector<int> >::const_iterator ml_iter = motherListMap.begin();
+  map< int, vector<int> >::const_iterator ml_iend = motherListMap.end();
+  while ( ml_iter != ml_iend ) {
+    const pair< int, vector<int> >& entry = *ml_iter++;
+    const vector<int>& iList = entry.second;
+    iObj = entry.first;
+    const vector<int>& mList = motherTable[iList[0]];
+    if ( iObj != mList[0] ) cout << "******** wrong map ********" << endl;
+    int iM;
+    int nM = iList.size();
+    for ( iM = 1; iM < nM; ++iM ) {
+      const vector<int>& cList = motherTable[iList[iM]];
+      if ( iObj != cList[0] ) cout << "******** wrong map ********" << endl;
+      if ( mList != cList ) {
+        cout << "****** different mother lists ******"
+             << iList[0] << " " << iList[iM] << endl;
+        int i;
+        int n = mList.size();
+        int m = cList.size();
+        for ( i = 0; i < n; ++i ) cout << " " << mList[i];
+        cout << endl;
+        for ( i = 0; i < m; ++i ) cout << " " << cList[i];
+        cout << endl;
+      }
+    }
+  }
+*/
 
   return;
 

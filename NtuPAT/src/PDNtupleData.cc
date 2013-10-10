@@ -236,6 +236,7 @@ PDNtupleData::PDNtupleData() {
   genId           = new std::vector<int   >;
   genStatus       = new std::vector<int   >;
   genMother       = new std::vector<int   >;
+  genPartner      = new std::vector<int   >;
   genPt           = new std::vector<number>;
   genEta          = new std::vector<number>;
   genPhi          = new std::vector<number>;

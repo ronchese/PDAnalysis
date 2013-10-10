@@ -67,6 +67,7 @@ class PDNtupleData {
   number mEt;
   number mEx;
   number mEy;
+  number mEsign;
 
   // muons
   bool use_muons;
@@ -275,7 +276,8 @@ class PDNtupleData {
   int nGenP;
   std::vector<int   >* genId;
   std::vector<int   >* genStatus;
-  std::vector<int   >* genMother; // mother index
+  std::vector<int   >* genMother;  // mother  index
+  std::vector<int   >* genPartner; // partner index
   std::vector<number>* genPt;
   std::vector<number>* genEta;
   std::vector<number>* genPhi;
