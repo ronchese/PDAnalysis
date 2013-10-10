@@ -1634,7 +1634,7 @@ void PDPATToNtuple::fillGenParticles() {
     int nM = gen.numberOfMothers();
     vector<int>& mList = motherTable[iObj];
     mList.resize( nM, -1 );
-    int id;
+//    int id;
 //    cout << iObj << " has " << nM << " mothers:";// << endl;
     for ( iM = 0; iM < nM; ++iM ) {
       map<const Candidate*,int>::const_iterator iter = genMap.find(
