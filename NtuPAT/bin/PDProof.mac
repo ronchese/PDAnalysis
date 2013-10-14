@@ -1,0 +1,13 @@
+{
+TProof* p = TProof::Open("workers=3");
+cout << "AddIncludePath: " << p->AddIncludePath(" $CMSSW_BASE/src/PDAnalysis/NtuPAT/bin  $CMSSW_BASE/src ", kTRUE ) << endl;
+cout << gSystem->GetIncludePath() << endl;
+//p->Exec(".!pwd");
+//p->Exec(".!ls -la");
+TChain *chain = new TChain("PDtree", "PDtree");
+chain->Add("/lustre/cmswork/ronchese/ntu/Prod_V09/mc/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_AZh_Prod5Bis/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_AZh_Prod5Bis_ntu_001.root");
+chain->Add("/lustre/cmswork/ronchese/ntu/Prod_V09/mc/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_AZh_Prod5Bis/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola_AZh_Prod5Bis_ntu_002.root");
+chain->SetProof();
+chain->Process("PDProofAnalyzer.cc++");//,"",5000);
+delete chain;
+}
