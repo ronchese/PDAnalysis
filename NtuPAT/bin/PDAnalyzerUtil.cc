@@ -157,9 +157,9 @@ bool PDAnalyzerUtil::getEntry( int ientry ) {
 }
 
 
-void PDAnalyzerUtil::getEvPre( int ientry ) {
+bool PDAnalyzerUtil::getEvPre( int ientry ) {
   currentTree->GetEntry( ientry );
-  return;
+  return true;
 }
 
 

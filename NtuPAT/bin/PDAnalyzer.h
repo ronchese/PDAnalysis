@@ -3,8 +3,10 @@
 
 #include "TH1.h"
 #include "PDAnalyzerUtil.h"
+#include "PDAnalysis/NtuPAT/interface/PDGenealogy.h"
 
-class PDAnalyzer: public PDAnalyzerUtil {
+class PDAnalyzer: public virtual PDAnalyzerUtil,
+                  public virtual PDGenealogy {
 
  public:
 
@@ -18,7 +20,7 @@ class PDAnalyzer: public PDAnalyzerUtil {
   void book();
 
   // functions called for each event
-//  virtual void getEvPre( int ientry );
+//  virtual bool getEvPre( int ientry );
   virtual bool analyze( int entry, int event_file );
   virtual bool analyze( int entry, int event_file, int event_tot );
 

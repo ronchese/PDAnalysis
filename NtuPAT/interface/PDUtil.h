@@ -1,42 +1,44 @@
 #ifndef PDUtil_H
 #define PDUtil_H
 
-#include "PDAnalysis/NtuPAT/interface/PDNtupleData.h"
+#include <vector>
 
-class PDUtil: public virtual PDNtupleData {
+class PDUtil {
 
  public:
+
+  typedef float number;
 
   PDUtil();
   virtual ~PDUtil();
 
-  static float energy( float px, float py, float pz, float mm );
-  static float invMass( float px1, float  py1, float  pz1, float mm1,
-                        float px2, float  py2, float  pz2, float mm2 );
-  static float invMass( float px1, float  py1, float  pz1, float mm1,
-                        float px2, float  py2, float  pz2, float mm2,
-                        float px3, float  py3, float  pz3, float mm3 );
-  static float invMass( float px1, float  py1, float  pz1, float mm1,
-                        float px2, float  py2, float  pz2, float mm2,
-                        float px3, float  py3, float  pz3, float mm3,
-                        float px4, float  py4, float  pz4, float mm4 );
-  static float invMSph( float pt1, float eta1, float phi1, float mm1,
-                        float pt2, float eta2, float phi2, float mm2 );
-  static float invMSph( float pt1, float eta1, float phi1, float mm1,
-                        float pt2, float eta2, float phi2, float mm2,
-                        float pt3, float eta3, float phi3, float mm3 );
-  static float invMSph( float pt1, float eta1, float phi1, float mm1,
-                        float pt2, float eta2, float phi2, float mm2,
-                        float pt3, float eta3, float phi3, float mm3,
-                        float pt4, float eta4, float phi4, float mm4 );
-  static float dSqua( float a1, float b1,
-                      float a2, float b2 );
-  static float dSqua( float a1, float b1, float c1,
-                      float a2, float b2, float c2 );
-  static float delta( float a1, float b1,
-                      float a2, float b2 );
-  static float delta( float a1, float b1, float c1,
-                      float a2, float b2, float c2 );
+  static number energy( number px, number py, number pz, number mm );
+  static number invMass( number px1, number  py1, number  pz1, number mm1,
+                         number px2, number  py2, number  pz2, number mm2 );
+  static number invMass( number px1, number  py1, number  pz1, number mm1,
+                         number px2, number  py2, number  pz2, number mm2,
+                         number px3, number  py3, number  pz3, number mm3 );
+  static number invMass( number px1, number  py1, number  pz1, number mm1,
+                         number px2, number  py2, number  pz2, number mm2,
+                         number px3, number  py3, number  pz3, number mm3,
+                         number px4, number  py4, number  pz4, number mm4 );
+  static number invMSph( number pt1, number eta1, number phi1, number mm1,
+                         number pt2, number eta2, number phi2, number mm2 );
+  static number invMSph( number pt1, number eta1, number phi1, number mm1,
+                         number pt2, number eta2, number phi2, number mm2,
+                         number pt3, number eta3, number phi3, number mm3 );
+  static number invMSph( number pt1, number eta1, number phi1, number mm1,
+                         number pt2, number eta2, number phi2, number mm2,
+                         number pt3, number eta3, number phi3, number mm3,
+                         number pt4, number eta4, number phi4, number mm4 );
+  static number dSqua( number a1, number b1,
+                       number a2, number b2 );
+  static number dSqua( number a1, number b1, number c1,
+                       number a2, number b2, number c2 );
+  static number delta( number a1, number b1,
+                       number a2, number b2 );
+  static number delta( number a1, number b1, number c1,
+                       number a2, number b2, number c2 );
 
   static void convCartSphe( number  x, number  y, number  z,
                             number& t, number& e, number& p );

@@ -19,72 +19,72 @@ PDUtil::~PDUtil() {
 }
 
 
-float PDUtil::energy( float px, float py, float pz, float mm ) {
+PDUtil::number PDUtil::energy( number px, number py, number pz, number mm ) {
   return sqrt( ( px * px ) + ( py * py ) + ( pz * pz ) + ( mm * mm ) );
 }
 
 
-float PDUtil::invMass( float px1, float py1,
-                       float pz1, float mm1,
-                       float px2, float py2,
-                       float pz2, float mm2 ) {
-  float pxt = px1 + px2;
-  float pyt = py1 + py2;
-  float pzt = pz1 + pz2;
-  float eet = energy( px1, py1, pz1, mm1 ) +
-              energy( px2, py2, pz2, mm2 );
+PDUtil::number PDUtil::invMass( number px1, number py1,
+                                number pz1, number mm1,
+                                number px2, number py2,
+                                number pz2, number mm2 ) {
+  number pxt = px1 + px2;
+  number pyt = py1 + py2;
+  number pzt = pz1 + pz2;
+  number eet = energy( px1, py1, pz1, mm1 ) +
+               energy( px2, py2, pz2, mm2 );
   return sqrt( ( eet * eet ) -
              ( ( pxt * pxt ) + ( pyt * pyt ) + ( pzt * pzt ) ) );
 }
 
 
-float PDUtil::invMass( float px1, float py1,
-                       float pz1, float mm1,
-                       float px2, float py2,
-                       float pz2, float mm2,
-                       float px3, float py3,
-                       float pz3, float mm3 ) {
-  float pxt = px1 + px2 + px3;
-  float pyt = py1 + py2 + py3;
-  float pzt = pz1 + pz2 + pz3;
-  float eet = energy( px1, py1, pz1, mm1 ) +
-              energy( px2, py2, pz2, mm2 ) +
-              energy( px3, py3, pz3, mm3 );
+PDUtil::number PDUtil::invMass( number px1, number py1,
+                                number pz1, number mm1,
+                                number px2, number py2,
+                                number pz2, number mm2,
+                                number px3, number py3,
+                                number pz3, number mm3 ) {
+  number pxt = px1 + px2 + px3;
+  number pyt = py1 + py2 + py3;
+  number pzt = pz1 + pz2 + pz3;
+  number eet = energy( px1, py1, pz1, mm1 ) +
+               energy( px2, py2, pz2, mm2 ) +
+               energy( px3, py3, pz3, mm3 );
   return sqrt( ( eet * eet ) -
              ( ( pxt * pxt ) + ( pyt * pyt ) + ( pzt * pzt ) ) );
 }
 
 
-float PDUtil::invMass( float px1, float py1,
-                       float pz1, float mm1,
-                       float px2, float py2,
-                       float pz2, float mm2,
-                       float px3, float py3,
-                       float pz3, float mm3,
-                       float px4, float py4,
-                       float pz4, float mm4 ) {
-  float pxt = px1 + px2 + px3 + px4;
-  float pyt = py1 + py2 + py3 + py4;
-  float pzt = pz1 + pz2 + pz3 + pz4;
-  float eet = energy( px1, py1, pz1, mm1 ) +
-              energy( px2, py2, pz2, mm2 ) +
-              energy( px3, py3, pz3, mm3 ) +
-              energy( px4, py4, pz4, mm4 );
+PDUtil::number PDUtil::invMass( number px1, number py1,
+                                number pz1, number mm1,
+                                number px2, number py2,
+                                number pz2, number mm2,
+                                number px3, number py3,
+                                number pz3, number mm3,
+                                number px4, number py4,
+                                number pz4, number mm4 ) {
+  number pxt = px1 + px2 + px3 + px4;
+  number pyt = py1 + py2 + py3 + py4;
+  number pzt = pz1 + pz2 + pz3 + pz4;
+  number eet = energy( px1, py1, pz1, mm1 ) +
+               energy( px2, py2, pz2, mm2 ) +
+               energy( px3, py3, pz3, mm3 ) +
+               energy( px4, py4, pz4, mm4 );
   return sqrt( ( eet * eet ) -
              ( ( pxt * pxt ) + ( pyt * pyt ) + ( pzt * pzt ) ) );
 }
 
 
-float PDUtil::invMSph( float  pt1, float eta1,
-                       float phi1, float  mm1,
-                       float  pt2, float eta2,
-                       float phi2, float  mm2 ) {
-  float px1;
-  float py1;
-  float pz1;
-  float px2;
-  float py2;
-  float pz2;
+PDUtil::number PDUtil::invMSph( number  pt1, number eta1,
+                                number phi1, number  mm1,
+                                number  pt2, number eta2,
+                                number phi2, number  mm2 ) {
+  number px1;
+  number py1;
+  number pz1;
+  number px2;
+  number py2;
+  number pz2;
   convSpheCart( pt1, eta1, phi1, px1, py1, pz1 );
   convSpheCart( pt2, eta2, phi2, px2, py2, pz2 );
   return invMass( px1, py1, pz1, mm1,
@@ -92,21 +92,21 @@ float PDUtil::invMSph( float  pt1, float eta1,
 }
 
 
-float PDUtil::invMSph( float  pt1, float eta1,
-                       float phi1, float  mm1,
-                       float  pt2, float eta2,
-                       float phi2, float  mm2,
-                       float  pt3, float eta3,
-                       float phi3, float  mm3 ) {
-  float px1;
-  float py1;
-  float pz1;
-  float px2;
-  float py2;
-  float pz2;
-  float px3;
-  float py3;
-  float pz3;
+PDUtil::number PDUtil::invMSph( number  pt1, number eta1,
+                                number phi1, number  mm1,
+                                number  pt2, number eta2,
+                                number phi2, number  mm2,
+                                number  pt3, number eta3,
+                                number phi3, number  mm3 ) {
+  number px1;
+  number py1;
+  number pz1;
+  number px2;
+  number py2;
+  number pz2;
+  number px3;
+  number py3;
+  number pz3;
   convSpheCart( pt1, eta1, phi1, px1, py1, pz1 );
   convSpheCart( pt2, eta2, phi2, px2, py2, pz2 );
   convSpheCart( pt3, eta3, phi3, px3, py3, pz3 );
@@ -116,26 +116,26 @@ float PDUtil::invMSph( float  pt1, float eta1,
 }
 
 
-float PDUtil::invMSph( float  pt1, float eta1,
-                       float phi1, float  mm1,
-                       float  pt2, float eta2,
-                       float phi2, float  mm2,
-                       float  pt3, float eta3,
-                       float phi3, float  mm3,
-                       float  pt4, float eta4,
-                       float phi4, float  mm4 ) {
-  float px1;
-  float py1;
-  float pz1;
-  float px2;
-  float py2;
-  float pz2;
-  float px3;
-  float py3;
-  float pz3;
-  float px4;
-  float py4;
-  float pz4;
+PDUtil::number PDUtil::invMSph( number  pt1, number eta1,
+                                number phi1, number  mm1,
+                                number  pt2, number eta2,
+                                number phi2, number  mm2,
+                                number  pt3, number eta3,
+                                number phi3, number  mm3,
+                                number  pt4, number eta4,
+                                number phi4, number  mm4 ) {
+  number px1;
+  number py1;
+  number pz1;
+  number px2;
+  number py2;
+  number pz2;
+  number px3;
+  number py3;
+  number pz3;
+  number px4;
+  number py4;
+  number pz4;
   convSpheCart( pt1, eta1, phi1, px1, py1, pz1 );
   convSpheCart( pt2, eta2, phi2, px2, py2, pz2 );
   convSpheCart( pt3, eta3, phi3, px3, py3, pz3 );
@@ -147,36 +147,36 @@ float PDUtil::invMSph( float  pt1, float eta1,
 }
 
 
-float PDUtil::dSqua( float a1, float b1,
-                     float a2, float b2 ) {
-  float aD = a1 - a2;
-  float bD = b1 - b2;
+PDUtil::number PDUtil::dSqua( number a1, number b1,
+                              number a2, number b2 ) {
+  number aD = a1 - a2;
+  number bD = b1 - b2;
   return ( ( aD * aD ) + ( bD * bD ) );
 }
 
 
-float PDUtil::dSqua( float a1, float b1, float c1,
-                     float a2, float b2, float c2 ) {
-  float aD = a1 - a2;
-  float bD = b1 - b2;
-  float cD = c1 - c2;
+PDUtil::number PDUtil::dSqua( number a1, number b1, number c1,
+                              number a2, number b2, number c2 ) {
+  number aD = a1 - a2;
+  number bD = b1 - b2;
+  number cD = c1 - c2;
   return ( ( aD * aD ) + ( bD * bD ) + ( cD * cD ) );
 }
 
 
-float PDUtil::delta( float a1, float b1,
-                     float a2, float b2 ) {
-  float aD = a1 - a2;
-  float bD = b1 - b2;
+PDUtil::number PDUtil::delta( number a1, number b1,
+                              number a2, number b2 ) {
+  number aD = a1 - a2;
+  number bD = b1 - b2;
   return sqrt( ( aD * aD ) + ( bD * bD ) );
 }
 
 
-float PDUtil::delta( float a1, float b1, float c1,
-                     float a2, float b2, float c2 ) {
-  float aD = a1 - a2;
-  float bD = b1 - b2;
-  float cD = c1 - c2;
+PDUtil::number PDUtil::delta( number a1, number b1, number c1,
+                              number a2, number b2, number c2 ) {
+  number aD = a1 - a2;
+  number bD = b1 - b2;
+  number cD = c1 - c2;
   return sqrt( ( aD * aD ) + ( bD * bD ) + ( cD * cD ) );
 }
 
@@ -184,7 +184,7 @@ float PDUtil::delta( float a1, float b1, float c1,
 void PDUtil::convCartSphe( number  x, number  y, number  z,
                            number& t, number& e, number& p ) {
   t = sqrt( ( x * x ) + ( y * y ) );
-  float
+  number
   r = sqrt( ( x * x ) + ( y * y ) + ( z * z ) );
   e = -log( ( r + z ) / ( r - z ) ) / 2.0;
   p = atan2( y, x );

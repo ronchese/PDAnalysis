@@ -23,6 +23,9 @@ PDAnalyzer::PDAnalyzer() {
 
   setUserParameter( "verbose", "f" );
 
+// only for MC
+//  setUserParameter( "use_gen", "t" );
+
 }
 
 
@@ -65,10 +68,12 @@ void PDAnalyzer::book() {
 }
 
 
-//void PDAnalyzer::getEvPre( int ientry ) {
+//bool PDAnalyzer::getEvPre( int ientry ) {
 //  b_nMuons->GetEntry( ientry );
 //  b_muoPt ->GetEntry( ientry );
-//  return;
+//  if ( !nMuons ) return false;
+//  if ( muoPt.front() < 5.0 ) return false;
+//  return true;
 //}
 
 
@@ -98,6 +103,9 @@ bool PDAnalyzer::analyze( int entry, int event_file, int event_tot ) {
   bool flag;
 
   flag = true;
+
+// only for MC
+//  print( genId, genMother );
 
   int iMuon;
   float ptmu;
