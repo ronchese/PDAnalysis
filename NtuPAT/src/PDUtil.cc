@@ -9,7 +9,7 @@
 #include "TBranch.h"
 #include "TTree.h"
 #include "TCanvas.h"
-#include "Math/LorentzVector.h"
+//#include "Math/LorentzVector.h"
 
 PDUtil::PDUtil() {
 }
@@ -180,6 +180,22 @@ PDUtil::number PDUtil::delta( number a1, number b1, number c1,
   return sqrt( ( aD * aD ) + ( bD * bD ) + ( cD * cD ) );
 }
 
+
+PDUtil::number PDUtil::dRSqua( number eta1, number phi1,
+                               number eta2, number phi2 ) {
+  number etaD = eta1 - eta2;
+  number phiD = phi1 - phi2;
+  phiD = fabs( M_PI - fabs( M_PI - fabs( phiD ) ) );
+  return ( etaD * etaD ) + ( phiD * phiD );
+}
+
+PDUtil::number PDUtil::deltaR( number eta1, number phi1,
+                               number eta2, number phi2 ) {
+  number etaD = eta1 - eta2;
+  number phiD = phi1 - phi2;
+  phiD = fabs( M_PI - fabs( M_PI - fabs( phiD ) ) );
+  return sqrt( ( etaD * etaD ) + ( phiD * phiD ) );
+}
 
 void PDUtil::convCartSphe( number  x, number  y, number  z,
                            number& t, number& e, number& p ) {

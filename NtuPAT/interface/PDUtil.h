@@ -1,13 +1,11 @@
 #ifndef PDUtil_H
 #define PDUtil_H
 
-#include <vector>
+#include "PDAnalysis/NtuPAT/interface/PDNtupleData.h"
 
-class PDUtil {
+class PDUtil: public virtual PDNtupleData {
 
  public:
-
-  typedef float number;
 
   PDUtil();
   virtual ~PDUtil();
@@ -39,6 +37,10 @@ class PDUtil {
                        number a2, number b2 );
   static number delta( number a1, number b1, number c1,
                        number a2, number b2, number c2 );
+  static number dRSqua( number eta1, number phi1,
+                        number eta2, number phi2 );
+  static number deltaR( number eta1, number phi1,
+                        number eta2, number phi2 );
 
   static void convCartSphe( number  x, number  y, number  z,
                             number& t, number& e, number& p );
