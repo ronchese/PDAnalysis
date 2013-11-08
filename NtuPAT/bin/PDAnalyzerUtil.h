@@ -50,13 +50,17 @@ class PDAnalyzerUtil: public PDLightNtuple,
   virtual void beginJob();
 
   virtual bool getEntry( int ientry );
-  virtual bool getEvPre( int ientry );
+  virtual void getEvPre( int ientry );
   virtual void getEntry( TBranch* branch, int ientry );
 
   int findSVtx( int trkIndex, int prevSVtx = -1 );
   bool goodJet( unsigned int iJet );
 
  private:
+
+
+  // flag to use event list as skip list
+  bool skipList;
 
   // cuts to select good jets
   int    jetNDaumin;

@@ -11,8 +11,6 @@
 #include "TCanvas.h"
 #include "Math/LorentzVector.h"
 
-using namespace std;
-
 PDAnalyzerUtil::PDAnalyzerUtil() {
 
   parameterSet = 0;
@@ -126,6 +124,7 @@ void PDAnalyzerUtil::beginJob() {
 
   initTree();
   read( getUserParameter( "eventList" ) );
+  skipList = ( getUserParameter( "listType" ) == "skip" );
 
   getUserParameter( "jetNDaumin", jetNDaumin );
   getUserParameter( "jetNDaumax", jetNDaumax );
@@ -151,15 +150,17 @@ bool PDAnalyzerUtil::getEntry( int ientry ) {
   b_runNumber  ->GetEntry( ientry );
   b_lumiSection->GetEntry( ientry );
   b_eventNumber->GetEntry( ientry );
-  if ( !find( runNumber, eventNumber ) ) return false;
-  getEvPre( ientry );
+//  if ( !find( runNumber, eventNumber ) ) return false;
+//  getEvPre( ientry );
+  if ( skipList ^ find( runNumber, eventNumber ) ) getEvPre( ientry );
+  else return false;
   return true;
 }
 
 
-bool PDAnalyzerUtil::getEvPre( int ientry ) {
+void PDAnalyzerUtil::getEvPre( int ientry ) {
   currentTree->GetEntry( ientry );
-  return true;
+  return;
 }
 
 
