@@ -22,6 +22,12 @@ class PDNtupleData {
   unsigned int lumiSection;
   unsigned int eventNumber;
 
+  // hlt path names
+  bool use_hltlist;
+  int nHLTPaths;
+  std::vector<int        >* hltCode;
+  std::vector<std::string>* hltName;
+
   // hlt status
   bool use_hlts;
   int nHLTStatus;
@@ -118,6 +124,7 @@ class PDNtupleData {
   std::vector<number>* eleChaIso;  //.chargedHadronIso()
   std::vector<number>* eleNeuIso;  //.neutralHadronIso()
   std::vector<number>* elePhoIso;  //.photonIso()
+  std::vector<number>* elePCHIso;  //.puChargedHadronIso()
   std::vector<number>* eleAbsEta;  //fabs(.superCluster()->eta())
   std::vector<number>* eleAEff;
     //ElectronEffectiveArea::GetElectronEffectiveArea(
@@ -165,6 +172,14 @@ class PDNtupleData {
   std::vector<number>* jetCHF;  //.chargedHadronEnergyFraction()
   std::vector<number>* jetCEF;  //.chargedEmEnergyFraction()
   std::vector<number>* jetNCH;  //.chargedMultiplicity()
+
+  // user info
+  bool use_info;
+  int nUserInfo;
+  std::vector<int   >* useObjType;
+  std::vector<int   >* useObjIndex;
+  std::vector<int   >* useInfoType;
+  std::vector<number>* useInfoValue;
 
   // particle flow
   bool use_pflow;
@@ -269,6 +284,10 @@ class PDNtupleData {
   std::vector<number>* tvpPy;
   std::vector<number>* tvpPz;
 
+  // PU weight
+  bool use_puwgt;
+  number puWeight;
+
   // gen particles
   bool use_gen;
   bool use_gen_sphe;
@@ -287,6 +306,22 @@ class PDNtupleData {
   std::vector<number>* genE;
   std::vector<int   >* genCharge;
   std::vector<number>* genMass;
+//  std::vector<int   >* genJet;
+
+  // gen jets
+  bool use_gpj;
+  bool use_gpj_sphe;
+  bool use_gpj_cart;
+  int nGenJets;
+  std::vector<number>* gpjPt;
+  std::vector<number>* gpjEta;
+  std::vector<number>* gpjPhi;
+  std::vector<number>* gpjPx;
+  std::vector<number>* gpjPy;
+  std::vector<number>* gpjPz;
+  std::vector<number>* gpjE;
+  std::vector<int   >* gpjNDau; //.numberOfDaughters()
+  std::vector<int   >* gpjReco; // reco jet index
 
  private:
 

@@ -39,7 +39,10 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 
 #include <iostream>
 #include <sstream>
@@ -63,6 +66,7 @@ using reco::HitPattern;
 using reco::Vertex;
 using reco::SecondaryVertexTagInfo;
 using reco::GenParticle;
+using reco::GenJet;
 
 using namespace std;
 
@@ -71,6 +75,10 @@ PDPATToNtuple::PDPATToNtuple( const edm::ParameterSet& ps ) {
   parameterSet = &ps;
   ntuName = ps.getUntrackedParameter<string>( "ntuName" );
   dumpNtuple = ( ntuName != "" );
+
+  setUserParameter( "use_hltlist",
+       ps.exists( "write_hltlist" ) ? ps.getParameter<string>(
+                  "write_hltlist" ) : "false" );
 
   setUserParameter( "labelTrigResults"   ,
                      labelTrigResults    = ps.getParameter<string>(
@@ -204,6 +212,17 @@ PDPATToNtuple::PDPATToNtuple( const edm::ParameterSet& ps ) {
   setUserParameter( "use_svts"           , ps.getParameter<string>(
                   "write_svts"      ) );
 
+  setUserParameter( "labelPUInfo"        ,
+                     labelPUInfo         = ps.getParameter<string>(
+                    "labelPUInfo"        ) );
+  setUserParameter( "use_puwgt"     ,
+                  ( read_puwgt      = (
+  getUserParameter( "labelPUInfo"        ) != "" ) ) ? "t" : "f" );
+  if ( ps.exists( "write_puwgt"     ) &&
+                    read_puwgt        )
+  setUserParameter( "use_puwgt"          , ps.getParameter<string>(
+                  "write_puwgt"     ) );
+
   setUserParameter( "labelGen"           ,
                      labelGen            = ps.getParameter<string>(
                     "labelGen"           ) );
@@ -214,6 +233,21 @@ PDPATToNtuple::PDPATToNtuple( const edm::ParameterSet& ps ) {
                     read_gen          )
   setUserParameter( "use_gen"            , ps.getParameter<string>(
                   "write_gen"       ) );
+
+  setUserParameter( "labelGPJ"           ,
+                     labelGPJ            = ps.getParameter<string>(
+                    "labelGPJ"           ) );
+  setUserParameter( "use_gpj"       ,
+                  ( read_gpj        = (
+  getUserParameter( "labelGPJ"           ) != "" ) ) ? "t" : "f" );
+  if ( ps.exists( "write_gpj"       ) &&
+                    read_gpj          )
+  setUserParameter( "use_gpj"            , ps.getParameter<string>(
+                  "write_gpj"       ) );
+
+  setUserParameter( "use_info",
+       ps.exists( "write_info" ) ? ps.getParameter<string>(
+                  "write_info" ) : "false" );
 
   setUserParameter( "use_tkips", getUserParameter( "use_svts" ) );
   if ( ps.exists( "write_tkips"   ) &&
@@ -233,51 +267,95 @@ PDPATToNtuple::PDPATToNtuple( const edm::ParameterSet& ps ) {
   if ( ps.exists( "write_hlto_sphe"     ) )
   setUserParameter( "use_hlto_sphe"     , ps.getParameter<string>(
                   "write_hlto_sphe"     ) );
+
   if ( ps.exists( "write_muons_cart"    ) )
   setUserParameter( "use_muons_cart"    , ps.getParameter<string>(
                   "write_muons_cart"    ) );
   if ( ps.exists( "write_muons_sphe"    ) )
   setUserParameter( "use_muons_sphe"    , ps.getParameter<string>(
                   "write_muons_sphe"     ) );
+
   if ( ps.exists( "write_electrons_cart" ) )
   setUserParameter( "use_electrons_cart", ps.getParameter<string>(
                   "write_electrons_cart" ) );
   if ( ps.exists( "write_electrons_sphe" ) )
   setUserParameter( "use_electrons_sphe", ps.getParameter<string>(
                   "write_electrons_sphe" ) );
+
   if ( ps.exists( "write_taus_cart"      ) )
   setUserParameter( "use_taus_cart"     , ps.getParameter<string>(
                   "write_taus_cart"      ) );
   if ( ps.exists( "write_taus_sphe"      ) )
   setUserParameter( "use_taus_sphe"     , ps.getParameter<string>(
                   "write_taus_sphe"      ) );
+
   if ( ps.exists( "write_jets_cart"      ) )
   setUserParameter( "use_jets_cart"     , ps.getParameter<string>(
                   "write_jets_cart"      ) );
   if ( ps.exists( "write_jets_sphe"      ) )
   setUserParameter( "use_jets_sphe"     , ps.getParameter<string>(
                   "write_jets_sphe"      ) );
+
   if ( ps.exists( "write_pflow_cart"     ) )
   setUserParameter( "use_pflow_cart"    , ps.getParameter<string>(
                   "write_pflow_cart"     ) );
   if ( ps.exists( "write_pflow_sphe"     ) )
   setUserParameter( "use_pflow_sphe"    , ps.getParameter<string>(
                   "write_pflow_sphe"     ) );
+
   if ( ps.exists( "write_tracks_cart"    ) )
   setUserParameter( "use_tracks_cart"   , ps.getParameter<string>(
                   "write_tracks_cart"    ) );
   if ( ps.exists( "write_tracks_sphe"    ) )
   setUserParameter( "use_tracks_sphe"   , ps.getParameter<string>(
                   "write_tracks_sphe"    ) );
+
   if ( ps.exists( "write_vtxps_cart"     ) )
   setUserParameter( "use_vtxps_cart"    , ps.getParameter<string>(
                   "write_vtxps_cart"     ) );
   if ( ps.exists( "write_vtxps_sphe"     ) )
-  setUserParameter( "use_gen_sphe"      , ps.getParameter<string>(
-                  "write_gen_sphe"       ) );
+  setUserParameter( "use_vtxps_sphe"    , ps.getParameter<string>(
+                  "write_vtxps_sphe"     ) );
+
   if ( ps.exists( "write_gen_cart"       ) )
   setUserParameter( "use_gen_cart"      , ps.getParameter<string>(
                   "write_gen_cart"       ) );
+  if ( ps.exists( "write_gen_sphe"       ) )
+  setUserParameter( "use_gen_sphe"      , ps.getParameter<string>(
+                  "write_gen_sphe"       ) );
+
+  if ( ps.exists( "write_gpj_sphe"       ) )
+  setUserParameter( "use_gpj_sphe"      , ps.getParameter<string>(
+                  "write_gpj_sphe"       ) );
+  if ( ps.exists( "write_gpj_cart"       ) )
+  setUserParameter( "use_gpj_cart"      , ps.getParameter<string>(
+                  "write_gpj_cart"       ) );
+
+  char apv = 'f';
+  if ( ps.exists( "writeAllPrimaryVertices" ) )
+                  apv = *ps.getParameter<string>(
+                  "writeAllPrimaryVertices" ).c_str();
+  writeAllPrimaryVertices = ( apv != 'f' ) && ( apv != 'F' );
+
+  char rmt = 'f';
+  if ( ps.exists( "recoverMuonTracks" ) )
+                  rmt = *ps.getParameter<string>(
+                  "recoverMuonTracks" ).c_str();
+  recoverMuonTracks = ( rmt != 'f' ) && ( rmt != 'F' );
+  if ( recoverMuonTracks ) read_tracks = true;
+  setUserParameter( "use_tracks"         ,
+                    read_tracks ? "t" : "f" );
+  if ( ps.exists( "write_tracks"    ) &&
+                    read_tracks       )
+  setUserParameter( "use_tracks"         , ps.getParameter<string>(
+                  "write_tracks"    ) );
+//  setUserParameter( "use_tracks"         , "t" );
+//  read_tracks = true;
+
+  if ( read_puwgt ) {
+    puWgt_mc   = ps.getParameter< vector<double> >( "puWgt_mc"   );
+    puWgt_data = ps.getParameter< vector<double> >( "puWgt_data" );
+  }
 
   if ( ps.exists( "savedTriggerPaths"   ) )
                    savedTriggerPaths    = ps.getParameter< vector<string> >(
@@ -285,11 +363,27 @@ PDPATToNtuple::PDPATToNtuple( const edm::ParameterSet& ps ) {
   if ( ps.exists( "savedTriggerObjects" ) )
                    savedTriggerObjects  = ps.getParameter< vector<string> >(
                   "savedTriggerObjects" );
+  if ( ps.exists( "savedJetInfo"        ) )
+                   savedJetInfo         = ps.getParameter< vector<string> >(
+                  "savedJetInfo"        );
+  bool              read_info = savedJetInfo.size();
+  setUserParameter( "use_info",
+                    read_info ? "t" : "f" );
+  if ( ps.exists( "write_info" ) &&
+                    read_info )
+  setUserParameter( "use_info", ps.getParameter<string>(
+                  "write_info" ) );
 
   char sPF = *ps.getParameter<string>( "selectAssociatedPF" ).c_str();
   char sTk = *ps.getParameter<string>( "selectAssociatedTk" ).c_str();
   selectAssociatedPF = ( sPF != 'f' ) && ( sPF != 'F' );
   selectAssociatedTk = ( sTk != 'f' ) && ( sTk != 'F' );
+
+  char aNP = ( ps.exists( "acceptNewTrigPaths" ) ?
+               *ps.getParameter<string>( "acceptNewTrigPaths" ).c_str() :
+               'f' );
+  fixedTrigPathList = ( aNP == 'f' ) || ( aNP == 'F' );
+  lastTrigMapSize = 0;
 
   jetPtMin  = ps.getParameter<double>( "jetPtMin"  );
   jetEtaMax = ps.getParameter<double>( "jetEtaMax" );
@@ -319,6 +413,21 @@ void PDPATToNtuple::beginJob() {
   PDAnalyzer::beginJob();
   openNtuple( ntuName );
   hltConfigProvider = 0;
+
+  if ( read_puwgt ) {
+    int iWgt;
+    int nWgt;
+    vector<float> pw_mc  ( nWgt = puWgt_mc  .size() );
+    for ( iWgt = 0; iWgt < nWgt; ++iWgt ) pw_mc  [iWgt] = puWgt_mc  [iWgt];
+    vector<float> pw_data( nWgt = puWgt_data.size() );
+    for ( iWgt = 0; iWgt < nWgt; ++iWgt ) pw_data[iWgt] = puWgt_data[iWgt];
+    LumiWeights = new edm::LumiReWeighting( pw_mc, pw_data );
+  }
+  else {
+    LumiWeights = 0;
+  }
+
+
   gROOT->cd();
   book();
   current->cd();
@@ -384,6 +493,7 @@ void PDPATToNtuple::analyze( const edm::EventBase& ev,
 
 }
 
+
 void PDPATToNtuple::read( const edm::EventBase& ev ) {
 
   currentEvBase = &ev;
@@ -395,6 +505,7 @@ void PDPATToNtuple::read( const edm::EventBase& ev ) {
 
   nHLTStatus  = 0;
   nHLTObjects = 0;
+  nUserInfo   = 0;
   nMuons      = 0;
   nElectrons  = 0;
   nTaus       = 0;
@@ -406,6 +517,11 @@ void PDPATToNtuple::read( const edm::EventBase& ev ) {
   nTkIPs      = 0;
   nVtxPs      = 0;
   nGenP       = 0;
+  nGenJets    = 0;
+  useObjType  ->clear();
+  useObjIndex ->clear();
+  useInfoType ->clear();
+  useInfoValue->clear();
   if ( read_hlts      ) fillHLTStatus   ();
   if ( read_hlto      ) fillHLTObjects  ();
   if ( read_bspot     ) fillBeamSpot    ();
@@ -419,7 +535,9 @@ void PDPATToNtuple::read( const edm::EventBase& ev ) {
   if ( read_tracks    ) fillTracks      ();
   if ( read_pvts      ) fillPVertices   ();
   if ( read_svts      ) fillSVertices   ();
+  if ( read_puwgt     ) fillPUWeight    ();
   if ( read_gen       ) fillGenParticles();
+  if ( read_gpj       ) fillGenJets     ();
 
   if ( read_muons && read_tracks ) linkMTracks();
 //  if ( read_pflow && read_jets   ) linkPFJets ();
@@ -485,29 +603,30 @@ void PDPATToNtuple::fillHLTStatus() {
   }
 
 
-  int nObj = triggerNames->size();
   int iObj;
+  int nObj = triggerNames->size();
   int iTrg;
+  int nTrg = savedTriggerPaths.size();
   int iPath;
   int iVers;
   int lVers;
   int lSave;
   int iPres;
-  int nTrg = savedTriggerPaths.size();
   for ( iObj = 0; iObj < nObj; ++iObj ) {
     const string& hltPathName = triggerNames->triggerName( iObj );
     int index = triggerNames->triggerIndex( hltPathName );
+    string base = PDEnumString::trigBase( hltPathName );
     iPath = -1;
     iVers = -1;
     iPres = -1;
     stringstream sstr;
     for ( iTrg = 0; iTrg < nTrg; ++iTrg ) {
       const string& name = savedTriggerPaths[iTrg];
-      if ( ( name != "*" ) &&
-           ( hltPathName.find( name, 0 ) == string::npos ) ) continue;
-      if ( ( iPath = PDEnumString::findTrigPath( hltPathName ) ) < 0 )
+      if ( !wildMatch( base, name ) ) continue;
+      if ( ( iPath = PDEnumString::findTrigPath( base,
+                                                 fixedTrigPathList ) ) < 0 )
           continue;
-      lSave =        name.length();
+      lSave = base.length();
       lVers = hltPathName.length() - lSave;
       sstr.clear();
       sstr.str(  hltPathName.substr( lSave, lVers ) );
@@ -530,6 +649,24 @@ void PDPATToNtuple::fillHLTStatus() {
       hltScale  ->push_back( iPres );
       hltRun    ->push_back( trigResults->wasrun( index ) );
       hltAccept ->push_back( trigResults->accept( index ) );
+    }
+  }
+
+  nHLTPaths = 0;
+  hltCode->clear();
+  hltName->clear();
+  const std::map<int,std::string>& tMap = PDEnumString::trigMap();
+  int newSize = tMap.size();
+  if ( newSize > lastTrigMapSize ) {
+    nHLTPaths = lastTrigMapSize = newSize;
+    hltCode->reserve( newSize );
+    hltName->reserve( newSize );
+    std::map<int,std::string>::const_iterator iter = tMap.begin();
+    std::map<int,std::string>::const_iterator iend = tMap.end();
+    while ( iter != iend ) {
+      const std::pair<int,std::string>& entry = *iter++;
+      hltCode->push_back( entry.first  );
+      hltName->push_back( entry.second );
     }
   }
 
@@ -693,6 +830,7 @@ void PDPATToNtuple::fillMuons() {
   muoNumMuHits   ->resize( nObj );
   muoNumPixHits  ->resize( nObj );
   muoNumTkHits   ->resize( nObj );
+  muoGTrk.resize( nObj );
   if ( !vMuons ) {
     cout << "invalid muons" << endl;
     return;
@@ -756,7 +894,38 @@ void PDPATToNtuple::fillMuons() {
     muoNumMuHits   ->at( iObj ) = 0;
     muoNumPixHits  ->at( iObj ) = 0;
     muoNumTkHits   ->at( iObj ) = 0;
+    muoGTrk.at( iObj ) = 0;
 
+    const Track* trkPtr;
+    if ( !( muon.isTrackerMuon() ) ) continue;
+    const TrackRef&  innerTrack = muon. innerTrack();
+    try {
+      muoNumValidHits->at( iObj ) =  innerTrack->numberOfValidHits();
+      trkPtr = innerTrack.get();
+    }
+    catch ( edm::Exception e ) {
+      muoNumValidHits->at( iObj ) = 0;
+      trkPtr = 0;
+    }
+
+    if ( !( muon. isGlobalMuon() ) ) continue;
+    const TrackRef& globalTrack = muon.globalTrack();
+    try {
+      const HitPattern& hitPattern = globalTrack->hitPattern();
+      muoNormChi2    ->at( iObj ) = globalTrack->normalizedChi2();
+      muoNumMuHits   ->at( iObj ) = hitPattern.numberOfValidMuonHits();
+      muoNumPixHits  ->at( iObj ) = hitPattern.numberOfValidPixelHits();
+      muoNumTkHits   ->at( iObj ) = hitPattern.numberOfValidTrackerHits();
+      trkPtr = globalTrack.get();
+    }
+    catch ( edm::Exception e ) {
+      muoNormChi2    ->at( iObj ) = 0.0;
+      muoNumMuHits   ->at( iObj ) = 0;
+      muoNumPixHits  ->at( iObj ) = 0;
+      muoNumTkHits   ->at( iObj ) = 0;
+      trkPtr = 0;
+    }
+/*
     if ( !( muon. isGlobalMuon() ) ) continue;
     if ( !( muon.isTrackerMuon() ) ) continue;
     const TrackRef&  innerTrack = muon. innerTrack();
@@ -772,6 +941,15 @@ void PDPATToNtuple::fillMuons() {
     muoNumMuHits   ->at( iObj ) = hitPattern.numberOfValidMuonHits();
     muoNumPixHits  ->at( iObj ) = hitPattern.numberOfValidPixelHits();
     muoNumTkHits   ->at( iObj ) = hitPattern.numberOfValidTrackerHits();
+    const Track* trkPtr;
+    try {
+    trkPtr = globalTrack.get();
+    }
+    catch ( edm::Exception e ) {
+    trkPtr = 0;
+    }
+*/
+    muoGTrk.at( iObj ) = trkPtr;
   }
 
   return;
@@ -802,6 +980,7 @@ void PDPATToNtuple::fillElectrons() {
   eleChaIso ->resize( nObj );
   eleNeuIso ->resize( nObj );
   elePhoIso ->resize( nObj );
+  elePCHIso ->resize( nObj );
   eleAbsEta ->resize( nObj );
   eleAEff   ->resize( nObj );
   eleID     ->resize( nObj );
@@ -854,6 +1033,7 @@ void PDPATToNtuple::fillElectrons() {
     eleChaIso ->at( iObj ) = electron.chargedHadronIso();
     eleNeuIso ->at( iObj ) = electron.neutralHadronIso();
     elePhoIso ->at( iObj ) = electron.photonIso();
+    elePCHIso ->at( iObj ) = electron.puChargedHadronIso();
 //    double absEta =
     eleAbsEta ->at( iObj ) = fabs( electron.superCluster()->eta() );
     eleAEff   ->at( iObj ) = -999.999;
@@ -872,7 +1052,6 @@ void PDPATToNtuple::fillElectrons() {
   return;
 
 }
-
 
 
 void PDPATToNtuple::fillTaus() {
@@ -985,10 +1164,11 @@ void PDPATToNtuple::fillJets() {
   jetMap.clear();
   pcjMap.clear();
   ptjMap.clear();
+  gpjMap.clear();
   nJets = 0;
   bool select;
   int jhiIndex;
-  map<const Jet*,int>::const_iterator j_iter = jhiMap.begin();
+  map<const Jet*,int>::const_iterator j_iter;
   map<const Jet*,int>::const_iterator j_iend = jhiMap.end();
   for ( iObj = 0; iObj < nObj; ++iObj ) {
 
@@ -1001,26 +1181,40 @@ void PDPATToNtuple::fillJets() {
     if (       jet.pt ()   > jetPtMin  ) select = true;
     if ( !select ) {
       if ( !vSvts ) continue;
-      j_iter = jhiMap.find( jPtr );
-      if ( j_iter == j_iend ) continue;
+      if ( ( j_iter = jhiMap.find( jPtr ) ) == j_iend ) continue;
       jhiIndex = j_iter->second;
       if ( sVertices->at( jhiIndex ).nVertices() ) select = true;
     }
     if ( !select ) continue;
 
+    gpjMap[jet.genJet()] = iObj;
+
+    std::vector<std::string> userFloatLabels = jPtr->userFloatNames();
+    int ijUI;
+    int isUI;
+    int njUI = userFloatLabels.size();
+    int nsUI = savedJetInfo.size();
+    for ( ijUI = 0; ijUI < njUI; ++ijUI ) {
+      const string& name = userFloatLabels[ijUI];
+      for ( isUI = 0; isUI < nsUI; ++isUI ) {
+        if ( wildMatch( name, savedJetInfo[isUI] ) )
+             fillUserInfo( PDEnumString::recJet, iObj,
+                           PDEnumString::findRecoUIType( name ),
+                           jPtr->userFloat( name ) );
+      }
+    }
+
     jetMap.insert( make_pair( &jet, nJets ) );
     const vector<PFCandidatePtr>& jPFC = jet.getPFConstituents();
-    int nPFC = jPFC.size();
     int iPFC;
+    int nPFC = jPFC.size();
     for ( iPFC = 0; iPFC < nPFC; ++iPFC ) {
       const PFCandidatePtr& pfp = jPFC.at( iPFC );
       try {
-        if ( pcjMap.find( &(*pfp) ) ==
-             pcjMap.end() ) pcjMap.insert( make_pair( &(*pfp), nJets ) );
+        pcjMap[&(*pfp)] = nJets;
         const TrackRef   & tkr = pfp->trackRef();
         const Track      * tkp = ( tkr.isNull() ? 0 : &(*tkr) );
-        if ( ptjMap.find( tkp ) ==
-             ptjMap.end() ) ptjMap.insert( make_pair( tkp, nJets ) );
+        ptjMap[tkp] = nJets;
       }
       catch ( edm::Exception e ) {
       }
@@ -1067,33 +1261,42 @@ void PDPATToNtuple::fillVtxTrkMap() {
   int iSVt;
   int nSVt = ( sVertices    .isValid() ? sVertices    ->size() : 0 );
 
-  map<const Track*,int>::const_iterator it_m = tkmMap.begin();
+  map<const Track*,int>::const_iterator it_m;
+  map<const Track*,int>::const_iterator it_e;
+  map<const Track*,int>::const_iterator it_p;
   map<const Track*,int>::const_iterator ie_m = tkmMap.end();
-  map<const Track*,int>::const_iterator it_e = tkeMap.begin();
   map<const Track*,int>::const_iterator ie_e = tkeMap.end();
-  map<const Track*,int>::const_iterator it_p = ptjMap.begin();
   map<const Track*,int>::const_iterator ie_p = ptjMap.end();
+  set<const Track*> mgtSet;
+  int iMGT;
+  int nMGT = muoGTrk.size();
+  for ( iMGT = 0; iMGT < nMGT; ++iMGT ) mgtSet.insert( muoGTrk.at( iMGT ) );
+  set<const Track*>::const_iterator it_g;
+  set<const Track*>::const_iterator ie_g = mgtSet.end();
   vtxList.resize( 0 );
   allPTk.clear();
   for ( iPVt = 0; iPVt < nPVt; ++iPVt ) {
     const Vertex& vtx = pVertices->at( iPVt );
-    bool found = false;
-    try {
-      Vertex::trackRef_iterator it_v = vtx.tracks_begin();
-      Vertex::trackRef_iterator ie_v = vtx.tracks_end();
-      while ( it_v != ie_v ) {
+    bool found = writeAllPrimaryVertices;
+    if ( recoverMuonTracks && !iPVt ) found = true;
+    Vertex::trackRef_iterator it_v = vtx.tracks_begin();
+    Vertex::trackRef_iterator ie_v = vtx.tracks_end();
+    while ( it_v != ie_v ) {
+      try {
         const reco::TrackBaseRef& tkr = *it_v++;
         const Track* tkp = &(*tkr);
         if ( allPTk.find( tkp ) == allPTk.end() ) allPTk.insert( tkp );
         it_m = tkmMap.find( tkp );
         it_e = tkeMap.find( tkp );
         it_p = ptjMap.find( tkp );
+        it_g = mgtSet.find( tkp );
         if ( it_m != ie_m ) found = true;
         if ( it_e != ie_e ) found = true;
         if ( it_p != ie_p ) found = true;
+        if ( it_g != ie_g ) found = true;
       }
-    }
-    catch ( edm::Exception e ) {
+      catch ( edm::Exception e ) {
+      }
     }
     if ( found ) vtxList.push_back( &vtx );
   }
@@ -1103,17 +1306,17 @@ void PDPATToNtuple::fillVtxTrkMap() {
   tkvMap.clear();
   for ( iPVt = 0; iPVt < nPVt; ++iPVt ) {
     const Vertex& vtx = *vtxList[iPVt];
-    try {
-      Vertex::trackRef_iterator it_v = vtx.tracks_begin();
-      Vertex::trackRef_iterator ie_v = vtx.tracks_end();
-      while ( it_v != ie_v ) {
+    Vertex::trackRef_iterator it_v = vtx.tracks_begin();
+    Vertex::trackRef_iterator ie_v = vtx.tracks_end();
+    while ( it_v != ie_v ) {
+      try {
         const reco::TrackBaseRef& tkr = *it_v++;
         if ( fabs( tkr->eta() ) > trkEtaMax ) continue;
         if (       tkr->pt ()   < trkPtMin  ) continue;
         tkvMap.insert( make_pair( &(*tkr), iPVt ) );
       }
-    }
-    catch ( edm::Exception e ) {
+      catch ( edm::Exception e ) {
+      }
     }
   }
 
@@ -1188,13 +1391,13 @@ void PDPATToNtuple::fillPFCandidates() {
   tkpMap.clear();
   nPF = 0;
   set<const Track      *    >::const_iterator r_iend = tkrSet.end();
-  map<const Track      *,int>::const_iterator m_iter = tkmMap.begin();
+  map<const Track      *,int>::const_iterator m_iter;
+  map<const Track      *,int>::const_iterator e_iter;
+  map<const Track      *,int>::const_iterator v_iter;
+  map<const PFCandidate*,int>::const_iterator j_iter;
   map<const Track      *,int>::const_iterator m_iend = tkmMap.end();
-  map<const Track      *,int>::const_iterator e_iter = tkeMap.begin();
   map<const Track      *,int>::const_iterator e_iend = tkeMap.end();
-  map<const Track      *,int>::const_iterator v_iter = tkvMap.begin();
   map<const Track      *,int>::const_iterator v_iend = tkvMap.end();
-  map<const PFCandidate*,int>::const_iterator j_iter = pcjMap.begin();
   map<const PFCandidate*,int>::const_iterator j_iend = pcjMap.end();
   for ( iObj = 0; iObj < nObj; ++iObj ) {
 
@@ -1221,6 +1424,7 @@ void PDPATToNtuple::fillPFCandidates() {
          ( vtxIndex < 0 ) &&
          ( jetIndex < 0 ) &&
          ( tkrSet.find( tkp ) == r_iend ) ) continue;
+//    else cout << "reject PFC: " << &pfc << endl;
 
     if ( tkp != 0 )
     tkpMap.insert( make_pair(  tkp, nPF ) );
@@ -1246,9 +1450,33 @@ void PDPATToNtuple::fillPFCandidates() {
 
   }
 
+/*
+  map<const Muon*,int>::const_iterator mm_iter = muoMap.begin();
+  map<const Muon*,int>::const_iterator mm_iend = muoMap.end();
+  while ( mm_iter != mm_iend ) {
+    const pair<const Muon*,int>& entry = *mm_iter++;
+    const Muon* muon = entry.first;
+    int iMuon        = entry.second;
+    try {
+      if ( muon->pfCandidateRef().isNull() ) continue;
+      const PFCandidate& pfm = *muon->pfCandidateRef();
+//      cout << &pfm << " " << muon->pfCandidateRef().get() << endl;
+//      map<const reco::PFCandidate*,int>::const_iterator p_iter;
+//      if ( ( p_iter = pfcMap.find( &pfm ) ) != pfcMap.end() )
+//          cout << iMuon << " ---> " << p_iter->second << endl;
+//      else
+//          cout << iMuon << " not associated " << endl;
+    }
+    catch ( edm::Exception e ) {
+      cout << "muon pfc lost" << endl;
+    }
+  }
+*/
+
   return;
 
 }
+
 
 void PDPATToNtuple::fillTracks() {
 
@@ -1273,29 +1501,42 @@ void PDPATToNtuple::fillTracks() {
   trkNormChi2->resize( 0 );
   trkDxy     ->resize( 0 );
   trkDz      ->resize( 0 );
+  int ngt = 0;
   if ( !vTracks ) {
+    if ( !recoverMuonTracks )
     cout << "invalid tracks" << endl;
-    return;
+    if ( !( nObj = muoGTrk.size() ) ) return;
   }
   else {
-    nObj = generalTracks->size();
+    nObj = ( ngt = generalTracks->size() ) + muoGTrk.size();
   }
 
   trkMap.clear();
   nTracks = 0;
   set<const Track      *    >::const_iterator r_iend = tkrSet.end();
-  map<const Track      *,int>::const_iterator m_iter = tkmMap.begin();
+  map<const Track      *,int>::const_iterator m_iter;
+  map<const Track      *,int>::const_iterator e_iter;
+  map<const Track      *,int>::const_iterator p_iter;
+  map<const Track      *,int>::const_iterator v_iter;
   map<const Track      *,int>::const_iterator m_iend = tkmMap.end();
-  map<const Track      *,int>::const_iterator e_iter = tkeMap.begin();
   map<const Track      *,int>::const_iterator e_iend = tkeMap.end();
-  map<const Track      *,int>::const_iterator p_iter = tkpMap.begin();
   map<const Track      *,int>::const_iterator p_iend = tkpMap.end();
-  map<const Track      *,int>::const_iterator v_iter = tkvMap.begin();
   map<const Track      *,int>::const_iterator v_iend = tkvMap.end();
   for ( iObj = 0; iObj < nObj; ++iObj ) {
 
-    const Track& trk = generalTracks->at( iObj );
-    const Track* tkp = &trk;
+//    const Track& trk = generalTracks->at( iObj );
+//    const Track* tkp = &trk;
+    const Track* tkp;
+    if ( iObj < ngt ) {
+      const Track& gtk = generalTracks->at( iObj );
+      tkp = &gtk;
+    }
+    else {
+      tkp = muoGTrk.at( iObj - ngt );
+      if ( tkp == 0 ) continue;
+    }
+    if ( trkMap.find( tkp ) != trkMap.end() ) continue;
+    const Track& trk = *tkp;
 
     int muoIndex = ( ( m_iter = tkmMap.find( tkp ) ) != m_iend ?
                        m_iter->second : -1 );
@@ -1359,7 +1600,7 @@ void PDPATToNtuple::fillPVertices() {
   pvtBadQuality->resize( 0 );
 
   nObj = vtxList.size();
-  map<const Track*,int>::const_iterator it_p = trkMap.begin();
+  map<const Track*,int>::const_iterator it_p;
   map<const Track*,int>::const_iterator ie_p = trkMap.end();
   nPVertices = 0;
   for ( iObj = 0; iObj < nObj; ++iObj ) {
@@ -1367,26 +1608,41 @@ void PDPATToNtuple::fillPVertices() {
     const Vertex& vtx = *vtxList[iObj];
     const Vertex::Point& pos = vtx.position();
 
-    bool found = false;
-    try {
-      Vertex::trackRef_iterator iter = vtx.tracks_begin();
-      Vertex::trackRef_iterator iend = vtx.tracks_end();
-      while ( iter != iend ) {
+    bool found = writeAllPrimaryVertices;
+    Vertex::trackRef_iterator iter = vtx.tracks_begin();
+    Vertex::trackRef_iterator iend = vtx.tracks_end();
+    while ( iter != iend ) {
+      try {
         const reco::TrackBaseRef& tkr = *iter++;
-        it_p = trkMap.find( &(*tkr) );
-        if ( it_p != ie_p ) {
-          found = true;
-          int trkIndex = it_p->second;
-          int& trkLink = trkPVtx->at( trkIndex );
-          if ( trkLink < 0 ) {
-            trkLink = nPVertices;
-            trkDxy->at( trkIndex ) = tkr->dxy( pos );
-            trkDz ->at( trkIndex ) = tkr->dz ( pos );
-          }
+        if ( ( it_p = trkMap.find( &(*tkr ) ) ) == ie_p ) continue;
+        found = true;
+        int trkIndex = it_p->second;
+        int& trkLink = trkPVtx->at( trkIndex );
+        if ( trkLink < 0 ) {
+          trkLink = nPVertices;
+          trkDxy->at( trkIndex ) = tkr->dxy( pos );
+          trkDz ->at( trkIndex ) = tkr->dz ( pos );
         }
       }
+      catch ( edm::Exception e ) {
+      }
     }
-    catch ( edm::Exception e ) {
+
+    if ( iObj == 0 ) {
+      int iGTrk;
+      int nGTrk = muoGTrk.size();
+      for ( iGTrk = 0; iGTrk < nGTrk; ++iGTrk ) {
+        const Track* trkPtr = muoGTrk.at( iGTrk );
+        if ( ( it_p = trkMap.find( trkPtr ) ) == ie_p ) continue;
+        int trkIndex = it_p->second;
+        int& trkLink = trkPVtx->at( trkIndex );
+        if ( trkLink < 0 ) {
+          trkLink = nPVertices;
+          trkDxy->at( trkIndex ) = trkPtr->dxy( pos );
+          trkDz ->at( trkIndex ) = trkPtr->dz ( pos );
+        }
+      }
+      found = true;
     }
 
     if ( !found ) continue;
@@ -1473,7 +1729,7 @@ void PDPATToNtuple::fillSVertices() {
     nObj = sVertices->size();
   }
 
-  map<const Jet  *,int>::const_iterator j_iter = jetMap.begin();
+  map<const Jet  *,int>::const_iterator j_iter;
   map<const Jet  *,int>::const_iterator j_iend = jetMap.end();
 //  map<const Track*,int>::const_iterator t_iter = trkMap.begin();
 //  map<const Track*,int>::const_iterator t_iend = trkMap.end();
@@ -1482,8 +1738,7 @@ void PDPATToNtuple::fillSVertices() {
   nVtxPs     = 0;
   for ( iObj = 0; iObj < nObj; ++iObj ) {
     const Jet* jet = &( jets->at( iObj ) );
-    j_iter = jetMap.find( jet );
-    if ( j_iter == j_iend ) continue;
+    if ( ( j_iter = jetMap.find( jet ) ) == j_iend ) continue;
     const SecondaryVertexTagInfo& secVtxTagInfo = sVertices->at( iObj );
     int iVtx;
     int nVtx = secVtxTagInfo.nVertices();
@@ -1495,12 +1750,12 @@ void PDPATToNtuple::fillSVertices() {
       addSecondaryVertex( vtx, dir, d2d, d3d, "svtTagInfo", j_iter->second );
       if ( currentEvSetup == 0 ) continue;
       try {
-        Vertex::trackRef_iterator v_iter = vtx.tracks_begin();
-        Vertex::trackRef_iterator v_iend = vtx.tracks_end();
-//        if ( distance( v_iter, v_iend ) <= 2 ) continue;
         edm::ESHandle<TransientTrackBuilder> builder;
         currentEvSetup->get<  TransientTrackRecord  >()
                        .get( "TransientTrackBuilder", builder );
+        Vertex::trackRef_iterator v_iter = vtx.tracks_begin();
+        Vertex::trackRef_iterator v_iend = vtx.tracks_end();
+//        if ( distance( v_iter, v_iend ) <= 2 ) continue;
         while ( v_iter != v_iend ) {
           const reco::TrackBaseRef& tkr = *v_iter++;
           if ( tkr->charge() != +1 ) continue;
@@ -1543,7 +1798,7 @@ void PDPATToNtuple::fillSVertices() {
           tipMap.insert( make_pair( tkp, addTrackIP( trkIndex, *tkp,
                                                      currentVtxId, vtx ) ) );
         }
-        map<const Track*,int>::const_iterator i_iter = tipMap.begin();
+        map<const Track*,int>::const_iterator i_iter;
         map<const Track*,int>::const_iterator i_iend = tipMap.end();
         Vertex::trackRef_iterator v_iter = vtx.tracks_begin();
         Vertex::trackRef_iterator v_iend = vtx.tracks_end();
@@ -1551,8 +1806,8 @@ void PDPATToNtuple::fillSVertices() {
           const reco::TrackBaseRef& tkr = *v_iter++;
           const Track* tkp = &(*tkr);
 //          t_iter = trkMap.find( tkp );
-          i_iter = tipMap.find( tkp );
-          int tipTrk = ( i_iter != i_iend ? i_iter->second : -1 );
+          int tipTrk = ( ( i_iter = tipMap.find( tkp ) ) != i_iend ?
+                           i_iter->second : -1 );
           addTrackVtxP( tipTrk, *tkp, vtx );
 //          if ( it_p != ie_p ) trkSVtx->at( it_p->second ) = currentVtxId;
 //          if ( tkr->charge() != +1 ) continue;
@@ -1575,16 +1830,35 @@ void PDPATToNtuple::fillSVertices() {
 }
 
 
+void PDPATToNtuple::fillPUWeight() {
+
+  currentEvBase->getByLabel( labelPUInfo, PUInfo );
+
+  int nPT = 0;
+  std::vector<PileupSummaryInfo>::const_iterator pu_iter = PUInfo->begin();
+  std::vector<PileupSummaryInfo>::const_iterator pu_iend = PUInfo->end();
+  while ( pu_iter != pu_iend ) {
+    const PileupSummaryInfo& info = *pu_iter++;
+    if ( info.getBunchCrossing() == 0 )
+      nPT = info.getTrueNumInteractions(); // getPU_NumInteractions();
+  }
+  puWeight = LumiWeights->weight( nPT );
+
+  return;
+
+}
+
+
 void PDPATToNtuple::fillGenParticles() {
 
   currentEvBase->getByLabel( getUserParameter( "labelGen" ),
-                             particles );
-  bool vGen = particles.isValid();
+                             genParticles );
+  bool vGen = genParticles.isValid();
 
   // store gen particles info
 
   int iObj;
-  int nObj = ( vGen ? particles->size() : 0 );
+  int nObj = ( vGen ? genParticles->size() : 0 );
   genId     ->resize( nObj );
   genStatus ->resize( nObj );
   genMother ->resize( nObj );
@@ -1598,16 +1872,18 @@ void PDPATToNtuple::fillGenParticles() {
   genE      ->resize( nObj );
   genCharge ->resize( nObj );
   genMass   ->resize( nObj );
+//  genJet    ->resize( nObj );
   if ( !vGen ) {
-    cout << "invalid particles" << endl;
+    cout << "invalid gen particles" << endl;
     return;
   }
 
-  map<const Candidate*,int> genMap;
+//  map<const Candidate*,int> genMap;
+  genMap.clear();
   nGenP = nObj;
   for ( iObj = 0; iObj < nObj; ++iObj ) {
 
-    const GenParticle& gen = particles->at( iObj );
+    const GenParticle& gen = genParticles->at( iObj );
     genMap.insert( make_pair( &gen, iObj ) );
 
     genId     ->at( iObj ) = gen.pdgId();
@@ -1623,32 +1899,28 @@ void PDPATToNtuple::fillGenParticles() {
     genE      ->at( iObj ) = gen.energy();
     genCharge ->at( iObj ) = gen.charge();
     genMass   ->at( iObj ) = gen.mass  ();
+//    genJet   ->at( iObj ) = -1;
 
   }
 
   vector< vector<int> > motherTable;
   motherTable.resize( nObj );
   for ( iObj = 0; iObj < nObj; ++iObj ) {
-    const GenParticle& gen = particles->at( iObj );
+    const GenParticle& gen = genParticles->at( iObj );
     int iM;
     int nM = gen.numberOfMothers();
     vector<int>& mList = motherTable[iObj];
     mList.resize( nM, -1 );
-//    int id;
-//    cout << iObj << " has " << nM << " mothers:";// << endl;
+    map<const Candidate*,int>::const_iterator iter;
+    map<const Candidate*,int>::const_iterator iend = genMap.end();
     for ( iM = 0; iM < nM; ++iM ) {
-      map<const Candidate*,int>::const_iterator iter = genMap.find(
-                                                       gen.mother( iM ) );
-      map<const Candidate*,int>::const_iterator iend = genMap.end();
-      if ( iter != iend ) mList[iM] = iter->second;
-//      id = ( iter != iend ? iter->second : -1 );
-//      cout << " " << id;
+      if ( ( iter = genMap.find( gen.mother( iM ) ) ) != iend )
+           mList[iM] = iter->second;
     }
-//    cout << endl;
     sort( mList.begin(), mList.end() );
     if ( mList.size() ) genMother->at( iObj ) = mList[0];
 //    cout << "gen particle: " << iObj << " "
-//                             << &(particles->at( iObj )) << " "
+//                             << &(genParticles->at( iObj )) << " "
 //                             << &gen << " " << genMother->at( iObj ) << " "
 //                             << gen.mother() << endl;
   }
@@ -1715,6 +1987,77 @@ void PDPATToNtuple::fillGenParticles() {
 }
 
 
+void PDPATToNtuple::fillGenJets() {
+
+  currentEvBase->getByLabel( getUserParameter( "labelGPJ" ),
+                             genJets );
+  bool vGPJ = genJets.isValid();
+
+  // store gen jets info
+
+  int iObj;
+  int nObj = ( vGPJ ? genJets->size() : 0 );
+  gpjPt  ->resize( nObj );
+  gpjEta ->resize( nObj );
+  gpjPhi ->resize( nObj );
+  gpjPx  ->resize( nObj );
+  gpjPy  ->resize( nObj );
+  gpjPz  ->resize( nObj );
+  gpjE   ->resize( nObj );
+  gpjNDau->resize( nObj );
+  gpjReco->resize( nObj );
+  if ( !vGPJ ) {
+    cout << "invalid gen jets" << endl;
+    return;
+  }
+
+  nGenJets = nObj;
+  for ( iObj = 0; iObj < nObj; ++iObj ) {
+
+    const GenJet& gpj = genJets->at( iObj );
+
+    gpjPt  ->at( iObj ) = gpj.pt    ();
+    gpjEta ->at( iObj ) = gpj.eta   ();
+    gpjPhi ->at( iObj ) = gpj.phi   ();
+    gpjPx  ->at( iObj ) = gpj.px    ();
+    gpjPy  ->at( iObj ) = gpj.py    ();
+    gpjPz  ->at( iObj ) = gpj.pz    ();
+    gpjE   ->at( iObj ) = gpj.energy();
+    gpjNDau->at( iObj ) = gpj.numberOfDaughters();
+
+    map<const GenJet*,int>::const_iterator j_iter;
+    gpjReco->at( iObj ) = ( ( j_iter = gpjMap.find( &gpj ) ) != gpjMap.end() ?
+			      j_iter->second : -1 );
+
+/*
+    const vector<const GenParticle*>& jGC = gpj.getGenConstituents();
+    map<const Candidate*,int>::const_iterator g_iter;
+    map<const Candidate*,int>::const_iterator g_iend = genMap.end();
+    int iGC;
+    int nGC = jGC.size();
+    for ( iGC = 0; iGC < nGC; ++iGC ) {
+      if ( ( g_iter = genMap.find( jGC.at( iGC ) ) ) != g_iend )
+           genJet->at( g_iter->second ) = iObj;
+    }
+*/
+  }
+
+  return;
+
+}
+
+
+void PDPATToNtuple::fillUserInfo( int obj, int index,
+                                  int info, number value ) {
+  ++nUserInfo;
+  useObjType  ->push_back( obj );
+  useObjIndex ->push_back( index );
+  useInfoType ->push_back( info );
+  useInfoValue->push_back( value );
+  return;
+}
+
+
 int PDPATToNtuple::addSecondaryVertex( const        Vertex& vtx,
                                        const  GlobalVector& dir,
                                        const Measurement1D& d2d,
@@ -1758,15 +2101,15 @@ int PDPATToNtuple::addSecondaryVertex( const        Vertex& vtx,
       tipMap.insert( make_pair( tkp, addTrackIP( trkIndex, *tkp,
                                                  nSVertices, vtx ) ) );
     }
-    map<const Track*,int>::const_iterator i_iter = tipMap.begin();
+    map<const Track*,int>::const_iterator i_iter;
     map<const Track*,int>::const_iterator i_iend = tipMap.end();
     Vertex::trackRef_iterator v_iter = vtx.tracks_begin();
     Vertex::trackRef_iterator v_iend = vtx.tracks_end();
     while ( v_iter != v_iend ) {
       const reco::TrackBaseRef& tkr = *v_iter++;
       const Track* tkp = &(*tkr);
-      i_iter = tipMap.find( tkp );
-      int tipTrk = ( i_iter != i_iend ? i_iter->second : -1 );
+      int tipTrk = ( ( i_iter = tipMap.find( tkp ) ) != i_iend ?
+                       i_iter->second : -1 );
       addTrackVtxP( tipTrk, *tkp, vtx );
     }
   }
@@ -1807,6 +2150,8 @@ int PDPATToNtuple::addTrackVtxP( int tipIndex, const reco::Track & trk,
 
 void PDPATToNtuple::linkMTracks() {
 
+  map<const Track*,int>::const_iterator t_iter;
+  map<const Track*,int>::const_iterator t_iend = trkMap.end();
   map<const Muon*,int>::const_iterator m_iter = muoMap.begin();
   map<const Muon*,int>::const_iterator m_iend = muoMap.end();
   while ( m_iter != m_iend ) {
@@ -1816,14 +2161,20 @@ void PDPATToNtuple::linkMTracks() {
     try {
       if ( muon->pfCandidateRef().isNull() ) continue;
       const PFCandidate& pfm = *muon->pfCandidateRef();
+//      map<const reco::PFCandidate*,int>::const_iterator p_iter;
+//      cout << iMuon << " ---> " << &pfm << " " << pfcMap.size() << endl;
+//      if ( ( p_iter = pfcMap.find( &pfm ) ) != pfcMap.end() )
+//          cout << iMuon << " ---> " << p_iter->second << endl;
+//      else
+//          cout << iMuon << " not associated to pfc" << endl;
       if ( pfm.trackRef().isNull() ) continue;
       const reco::TrackRef& trk = pfm.trackRef();
-      map<const Track*,int>::const_iterator t_iter = trkMap.find( &(*trk) );
-      map<const Track*,int>::const_iterator t_iend = trkMap.end();
-      if ( t_iter != t_iend ) muoTrk->at( iMuon ) = t_iter->second;
+      if ( ( t_iter = trkMap.find( &(*trk) ) ) != t_iend )
+           muoTrk->at( iMuon ) = t_iter->second;
     }
     catch ( edm::Exception e ) {
-      cout << "muon trk lost" << endl;
+      if ( ( t_iter = trkMap.find( muoGTrk.at( iMuon ) ) ) != t_iend )
+           muoTrk->at( iMuon ) = t_iter->second;
     }
   }
 
@@ -1889,6 +2240,8 @@ void PDPATToNtuple::linkPFJets() {
 
 void PDPATToNtuple::linkPTracks() {
 
+  map<const Track*,int>::const_iterator t_iter;
+  map<const Track*,int>::const_iterator t_iend = trkMap.end();
   map<const PFCandidate*,int>::const_iterator p_iter = pfcMap.begin();
   map<const PFCandidate*,int>::const_iterator p_iend = pfcMap.end();
   while ( p_iter != p_iend ) {
@@ -1898,9 +2251,7 @@ void PDPATToNtuple::linkPTracks() {
     if ( !pfc->charge() ) continue;
     try {
       const TrackRef& trk = pfc->trackRef();
-      map<const Track*,int>::const_iterator t_iter = trkMap.find( &(*trk) );
-      map<const Track*,int>::const_iterator t_iend = trkMap.end();
-      if ( t_iter == t_iend ) continue;
+      if ( ( t_iter = trkMap.find( &(*trk) ) ) == t_iend ) continue;
       int iTrk = t_iter->second;
       pfcTrk->at( iPFC ) = iTrk;
       trkPFC->at( iTrk ) = iPFC;
@@ -1913,6 +2264,7 @@ void PDPATToNtuple::linkPTracks() {
   return;
 
 }
+
 
 int PDPATToNtuple::nearestHLT( PDEnumString::trigObject type,
                                double pt, double eta, double phi ) {
@@ -1941,4 +2293,26 @@ int PDPATToNtuple::nearestHLT( PDEnumString::trigObject type,
   return -1;
 }
 
+
+bool PDPATToNtuple::wildMatch( const string& name, string model ) {
+  if ( ( model == "*" ) || ( model == "*" ) ) return true;
+  int mLength = model.length();
+  int nLength =  name.length();
+  const char* mtemp = model.c_str();
+  bool wildHead = ( mtemp[0]           == '*' );
+  bool wildTail = ( mtemp[mLength - 1] == '*' );
+  if ( wildHead ) model = model.substr( 1, --mLength );
+  if ( wildTail ) model = model.substr( 0, --mLength );
+  string::size_type mpos = name.find( model, 0 );
+  if ( mpos == string::npos ) return false;
+  if ( wildHead ) {
+    mLength += mpos;
+    mpos = 0;
+  }
+  else {
+    if ( mpos ) return false;
+  }
+  if ( wildTail ) return true;
+  return ( nLength == mLength );
+}
 

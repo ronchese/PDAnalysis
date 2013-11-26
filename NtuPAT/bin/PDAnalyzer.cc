@@ -5,6 +5,7 @@
 
 #include "PDAnalyzer.h"
 #include "PDAnalyzerUtil.cc"
+#include "PDAnalysis/NtuPAT/interface/PDEnumString.h"
 
 #include "TDirectory.h"
 #include "TBranch.h"
@@ -103,6 +104,14 @@ bool PDAnalyzer::analyze( int entry, int event_file, int event_tot ) {
   bool flag;
 
   flag = true;
+
+//  int iHLT;
+//  int path;
+//  for ( iHLT = 0; iHLT < nHLTStatus; ++iHLT ) {
+//    path = hltPath->at( iHLT );
+////    cout << path << " -> " << PDEnumString::findTrigPath( path ) << " <-" << endl;
+//    cout << PDEnumString::findTrigPath( path ) << " " << path << endl;
+//  }
 
 // only for MC
 //  print( genId, genMother );

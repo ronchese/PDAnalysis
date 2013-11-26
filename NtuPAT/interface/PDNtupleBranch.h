@@ -19,12 +19,20 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
 
  protected:
 
+  std::string numberType;
+
   // List of branches
 
   // header
   TBranch* b_runNumber;
   TBranch* b_lumiSection;
   TBranch* b_eventNumber;
+
+  // hlt path names
+  void setBranches_hltlist();
+  TBranch* b_nHLTPaths;
+  TBranch* b_hltCode;
+  TBranch* b_hltName;
 
   // hlt status
   void setBranches_hlts();
@@ -116,6 +124,7 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
   TBranch* b_eleChaIso;
   TBranch* b_eleNeuIso;
   TBranch* b_elePhoIso;
+  TBranch* b_elePCHIso;
   TBranch* b_eleAbsEta;
   TBranch* b_eleAEff;
   TBranch* b_eleID;
@@ -156,6 +165,14 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
   TBranch* b_jetCHF;
   TBranch* b_jetCEF;
   TBranch* b_jetNCH;
+
+  // user info
+  void setBranches_userinfo();
+  TBranch* b_nUserInfo;
+  TBranch* b_useObjType;
+  TBranch* b_useObjIndex;
+  TBranch* b_useInfoType;
+  TBranch* b_useInfoValue;
 
   // particle flow
   void setBranches_pflow();
@@ -252,6 +269,10 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
   TBranch* b_tvpPy;
   TBranch* b_tvpPz;
 
+  // PU weight
+  void setBranches_puwgt();
+  TBranch* b_puWeight;
+
   // gen particles
   void setBranches_gen();
   TBranch* b_nGenP;
@@ -268,11 +289,27 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
   TBranch* b_genE;
   TBranch* b_genCharge;
   TBranch* b_genMass;
+//  TBranch* b_genJet;
+
+  // gen jets
+  void setBranches_gpj();
+  TBranch* b_nGenJets;
+  TBranch* b_gpjPt;
+  TBranch* b_gpjEta;
+  TBranch* b_gpjPhi;
+  TBranch* b_gpjPx;
+  TBranch* b_gpjPy;
+  TBranch* b_gpjPz;
+  TBranch* b_gpjE;
+  TBranch* b_gpjNDau;
+  TBranch* b_gpjReco;
 
  private:
 
   PDNtupleBranch( const PDNtupleBranch& td );
   PDNtupleBranch& operator=( const PDNtupleBranch& td );
+
+  const char* bCat( const std::string& name, const std::string& type );
 
 };
 

@@ -15,6 +15,7 @@
 <use   name="HLTrigger/HLTcore"/>
 <use   name="DataFormats/PatCandidates"/>
 <use   name="PhysicsTools/CandUtils"/>
+<use   name="PhysicsTools/Utilities"/>
 <use   name="PhysicsTools/FWLite"/>
 <use   name="CommonTools/CandUtils"/>
 <use   name="PhysicsTools/UtilAlgos"/>

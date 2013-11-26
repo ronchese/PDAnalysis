@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "PDAnalyzerUtil.h"
+#include "PDAnalysis/NtuPAT/interface/PDEnumString.h"
 
 #include "TDirectory.h"
 #include "TBranch.h"
@@ -30,6 +31,7 @@ PDAnalyzerUtil::PDAnalyzerUtil() {
   setUserParameter( "use_electrons", "false" );
   setUserParameter( "use_taus"     , "false" );
   setUserParameter( "use_jets"     , "true"  );
+  setUserParameter( "use_info"     , "true"  );
   setUserParameter( "use_pflow"    , "true"  );
   setUserParameter( "use_tracks"   , "true"  );
   setUserParameter( "use_pvts"     , "true"  );
@@ -37,6 +39,7 @@ PDAnalyzerUtil::PDAnalyzerUtil() {
   setUserParameter( "use_tkips"    , "true"  );
   setUserParameter( "use_vtxps"    , "true"  );
   setUserParameter( "use_gen"      , "false" );
+  setUserParameter( "use_gpj"      , "false" );
 
   setUserParameter( "use_hlto_sphe"     , "true"  );
   setUserParameter( "use_hlto_cart"     , "false" );
@@ -56,6 +59,8 @@ PDAnalyzerUtil::PDAnalyzerUtil() {
   setUserParameter( "use_vtxps_cart"    , "false" );
   setUserParameter( "use_gen_sphe"      , "true"  );
   setUserParameter( "use_gen_cart"      , "false" );
+  setUserParameter( "use_gpj_sphe"      , "true"  );
+  setUserParameter( "use_gpj_cart"      , "false" );
 
   setUserParameter( "jetNDaumin",  "1" );
   setUserParameter( "jetNDaumax",  "999999999" );
@@ -85,6 +90,7 @@ void PDAnalyzerUtil::beginJob() {
   // by passing the corresponding variable,
   // e.g. getUserParameter( "name", x )
 
+  getUserParameter( "use_hltlist"  , use_hltlist   );
   getUserParameter( "use_hlts"     , use_hlts      );
   getUserParameter( "use_hlto"     , use_hlto      );
   getUserParameter( "use_bspot"    , use_bspot     );
@@ -93,13 +99,16 @@ void PDAnalyzerUtil::beginJob() {
   getUserParameter( "use_electrons", use_electrons );
   getUserParameter( "use_taus"     , use_taus      );
   getUserParameter( "use_jets"     , use_jets      );
+  getUserParameter( "use_info"     , use_info      );
   getUserParameter( "use_pflow"    , use_pflow     );
   getUserParameter( "use_tracks"   , use_tracks    );
   getUserParameter( "use_pvts"     , use_pvts      );
   getUserParameter( "use_svts"     , use_svts      );
   getUserParameter( "use_tkips"    , use_tkips     );
   getUserParameter( "use_vtxps"    , use_vtxps     );
+  getUserParameter( "use_puwgt"    , use_puwgt     );
   getUserParameter( "use_gen"      , use_gen       );
+  getUserParameter( "use_gpj"      , use_gpj       );
   if ( !use_jets ) use_svts = false;
   if ( !use_svts ) { use_tkips = false;
                      use_tkips = false; }
@@ -121,6 +130,8 @@ void PDAnalyzerUtil::beginJob() {
   getUserParameter( "use_vtxps_cart"    , use_vtxps_cart     );
   getUserParameter( "use_gen_sphe"      , use_gen_sphe       );
   getUserParameter( "use_gen_cart"      , use_gen_cart       );
+  getUserParameter( "use_gpj_sphe"      , use_gpj_sphe       );
+  getUserParameter( "use_gpj_cart"      , use_gpj_cart       );
 
   initTree();
   read( getUserParameter( "eventList" ) );
@@ -150,9 +161,22 @@ bool PDAnalyzerUtil::getEntry( int ientry ) {
   b_runNumber  ->GetEntry( ientry );
   b_lumiSection->GetEntry( ientry );
   b_eventNumber->GetEntry( ientry );
+  if ( use_hltlist ) {
+    b_nHLTPaths->GetEntry( ientry );
+    if ( nHLTPaths ) {
+      b_hltCode  ->GetEntry( ientry );
+      b_hltName  ->GetEntry( ientry );
+      PDEnumString::resetTrigMap();
+      int iHLT;
+      for ( iHLT = 0; iHLT < nHLTPaths; ++iHLT )
+            PDEnumString::findTrigPath( hltName->at( iHLT ), false,
+                                        hltCode->at( iHLT ) );
+      PDEnumString::revertTrigMap();
+    }
+  }
 //  if ( !find( runNumber, eventNumber ) ) return false;
 //  getEvPre( ientry );
-  if ( skipList ^ find( runNumber, eventNumber ) ) getEvPre( ientry );
+  if ( skipList != find( runNumber, eventNumber ) ) getEvPre( ientry );
   else return false;
   return true;
 }

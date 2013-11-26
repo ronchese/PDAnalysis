@@ -28,7 +28,7 @@ class PDAnalyzerUtil: public PDNtuple,
 // additional operation
 #include "PDLightNtuple.h"
 class PDAnalyzerUtil: public PDLightNtuple,
-                       public PDEventSelect {
+                      public PDEventSelect {
 
 #else
 #error use -D UTIL_USE=FULL or -D UTIL_USE=BARE

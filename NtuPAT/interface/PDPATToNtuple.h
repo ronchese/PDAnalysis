@@ -18,6 +18,7 @@ class TFile;
 namespace edm {
   class TriggerResults;
   class TriggerNames;
+  class LumiReWeighting;
 }
 
 namespace pat {
@@ -37,9 +38,12 @@ namespace reco {
   class Vertex;
   class SecondaryVertexTagInfo;
   class GenParticle;
+  class GenJet;
+  class Candidate;
 }
 
 class HLTConfigProvider;
+class PileupSummaryInfo;
 
 class PDPATToNtuple: public PDAnalyzer,
                      public TreeWriter {
@@ -84,10 +88,14 @@ class PDPATToNtuple: public PDAnalyzer,
   std::string labelGeneralTracks;
   std::string labelPVertices;
   std::string labelSVertices;
+  std::string labelPUInfo;
   std::string labelGen;
+  std::string labelGPJ;
 
   bool selectAssociatedPF;
   bool selectAssociatedTk;
+  bool recoverMuonTracks;
+  bool writeAllPrimaryVertices;
 
   bool read_hlts;
   bool read_hlto;
@@ -101,7 +109,9 @@ class PDPATToNtuple: public PDAnalyzer,
   bool read_tracks;
   bool read_pvts;
   bool read_svts;
+  bool read_puwgt;
   bool read_gen;
+  bool read_gpj;
 
   edm::Handle< edm::TriggerResults                       > trigResults;
   edm::Handle< pat::TriggerEvent                         > trigEvent;
@@ -116,12 +126,24 @@ class PDPATToNtuple: public PDAnalyzer,
   edm::Handle< std::vector<reco::Track                 > > generalTracks;
   edm::Handle< std::vector<reco::Vertex                > > pVertices;
   edm::Handle< std::vector<reco::SecondaryVertexTagInfo> > sVertices;
-  edm::Handle< std::vector<reco::GenParticle           > > particles;
+  edm::Handle< std::vector<PileupSummaryInfo           > > PUInfo;
+  edm::Handle< std::vector<reco::GenParticle           > > genParticles;
+  edm::Handle< std::vector<reco::GenJet                > > genJets;
+
+//  edm::InputTag genjets_;
 
   const edm::TriggerNames* triggerNames;
   std::vector<std::string> savedTriggerPaths;
   std::vector<std::string> savedTriggerObjects;
+  std::vector<std::string> savedJetInfo;
   HLTConfigProvider* hltConfigProvider;
+
+  std::vector<double> puWgt_mc;
+  std::vector<double> puWgt_data;
+  edm::LumiReWeighting* LumiWeights;
+
+  bool fixedTrigPathList;
+  int lastTrigMapSize;
 
   float jetPtMin;
   float jetEtaMax;
@@ -144,8 +166,11 @@ class PDPATToNtuple: public PDAnalyzer,
   std::map<const reco::Track      *,int> ptjMap;
   std::map<const reco::Track      *,int> tkvMap;
   std::map<const reco::Track      *,int> trkMap;
+  std::map<const reco::Candidate  *,int> genMap;
+  std::map<const reco::GenJet     *,int> gpjMap;
   std::set<const reco::Track      *    > tkrSet;
   std::set<const reco::Track      *    > allPTk;
+  std::vector<const reco::Track *> muoGTrk;
   std::vector<const reco::Vertex*> vtxList;
 
   bool dumpNtuple;
@@ -162,7 +187,13 @@ class PDPATToNtuple: public PDAnalyzer,
   void fillTracks      ();
   void fillPVertices   ();
   void fillSVertices   ();
+  void fillPUWeight    ();
   void fillGenParticles();
+  void fillGenJets     ();
+//  void fillUserInfo( PDEnumString::recoObject obj, int index,
+//                     PDEnumString::infoType info , number value );
+  void fillUserInfo( int obj, int index,
+                     int info , number value );
 
   int addSecondaryVertex( const reco::Vertex& vtx,
                           const  GlobalVector& dir,
@@ -180,6 +211,8 @@ class PDPATToNtuple: public PDAnalyzer,
 
   int nearestHLT( PDEnumString::trigObject type,
                   double pt, double eta, double phi );
+
+  bool wildMatch( const std::string& name, std::string model );
 
 };
 

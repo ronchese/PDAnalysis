@@ -4,6 +4,11 @@
 
 PDNtupleData::PDNtupleData() {
 
+  // hlt path names
+  use_hltlist = false;
+  hltCode = new std::vector<int        >;
+  hltName = new std::vector<std::string>;
+
   // hlt status
   use_hlts = false;
   hltPath         = new std::vector<int >;
@@ -80,6 +85,7 @@ PDNtupleData::PDNtupleData() {
   eleChaIso       = new std::vector<number>;
   eleNeuIso       = new std::vector<number>;
   elePhoIso       = new std::vector<number>;
+  elePCHIso       = new std::vector<number>;
   eleAbsEta       = new std::vector<number>;
   eleAEff         = new std::vector<number>;
   eleID           = new std::vector<int   >;
@@ -140,6 +146,14 @@ PDNtupleData::PDNtupleData() {
   pfcCharge       = new std::vector<int   >;
   pfcJet          = new std::vector<int   >;
   pfcTrk          = new std::vector<int   >;
+
+  // user info
+  use_info = false;
+  nUserInfo = 0;
+  useObjType   = new std::vector<int   >;
+  useObjIndex  = new std::vector<int   >;
+  useInfoType  = new std::vector<int   >;
+  useInfoValue = new std::vector<number>;
 
   // tracks
   use_tracks      = false;
@@ -228,6 +242,9 @@ PDNtupleData::PDNtupleData() {
   tvpPy           = new std::vector<number>;
   tvpPz           = new std::vector<number>;
 
+  // PU weight
+  use_puwgt = false;
+
   // gen particles
   use_gen      = false;
   use_gen_sphe = true;
@@ -246,6 +263,22 @@ PDNtupleData::PDNtupleData() {
   genE            = new std::vector<number>;
   genCharge       = new std::vector<int   >;
   genMass         = new std::vector<number>;
+//  genJet          = new std::vector<int   >;
+
+  // gen jets
+  use_gpj      = false;
+  use_gpj_sphe = true;
+  use_gpj_cart = false;
+  nGenJets = 0;
+  gpjPt           = new std::vector<number>;
+  gpjEta          = new std::vector<number>;
+  gpjPhi          = new std::vector<number>;
+  gpjPx           = new std::vector<number>;
+  gpjPy           = new std::vector<number>;
+  gpjPz           = new std::vector<number>;
+  gpjE            = new std::vector<number>;
+  gpjNDau         = new std::vector<int   >;
+  gpjReco         = new std::vector<int   >;
 
 }
 
