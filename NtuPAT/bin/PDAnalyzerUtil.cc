@@ -23,6 +23,7 @@ PDAnalyzerUtil::PDAnalyzerUtil() {
   // user parameters are set as names associated to a string, 
   // default values can be set in the analyzer class contructor
 
+  setUserParameter( "use_hltlist"  , "false" );
   setUserParameter( "use_hlts"     , "true"  );
   setUserParameter( "use_hlto"     , "true"  );
   setUserParameter( "use_bspot"    , "true"  );
