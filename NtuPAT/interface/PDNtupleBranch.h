@@ -209,6 +209,7 @@ class PDNtupleBranch: public virtual PDNtupleData, public virtual T {
 
   // primary vertices
   void setBranches_pVertices();
+  TBranch* b_nPVTotal;
   TBranch* b_nPVertices;
   TBranch* b_pvtX;
   TBranch* b_pvtY;

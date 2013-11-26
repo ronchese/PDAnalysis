@@ -466,6 +466,8 @@ template <class T>
 void PDNtupleBranch<T>::setBranches_pVertices() {
   // primary vertices
   int size = 8192;
+  this->setBranch( "nPVTotal"                 , &  nPVTotal       ,
+                   "nPVTotal/I"               , &b_nPVTotal        );
   this->setBranch( "nPVertices"               , &  nPVertices     ,
                    "nPVertices/I"             , &b_nPVertices      );
   this->setBranch( "pvtX"                     , &  pvtX           ,

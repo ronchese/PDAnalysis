@@ -178,6 +178,7 @@ PDNtupleData::PDNtupleData() {
 
   // primary vertices
   use_pvts =  false;
+  nPVTotal   = 0;
   nPVertices = 0;
   pvtX            = new std::vector<number>;
   pvtY            = new std::vector<number>;

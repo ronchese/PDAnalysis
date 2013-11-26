@@ -220,6 +220,7 @@ class PDNtupleData {
 
   // primary vertices
   bool use_pvts;
+  int nPVTotal;
   int nPVertices;
   std::vector<number>* pvtX;
   std::vector<number>* pvtY;

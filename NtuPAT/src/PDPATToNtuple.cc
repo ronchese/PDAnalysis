@@ -512,6 +512,7 @@ void PDPATToNtuple::read( const edm::EventBase& ev ) {
   nJets       = 0;
   nPF         = 0;
   nTracks     = 0;
+  nPVTotal    = 0;
   nPVertices  = 0;
   nSVertices  = 0;
   nTkIPs      = 0;
@@ -1301,6 +1302,7 @@ void PDPATToNtuple::fillVtxTrkMap() {
     if ( found ) vtxList.push_back( &vtx );
   }
 
+  nPVTotal = nPVt;
   nPVt = vtxList.size();
 
   tkvMap.clear();
