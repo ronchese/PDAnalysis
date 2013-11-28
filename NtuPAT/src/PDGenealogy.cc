@@ -246,6 +246,14 @@ multimap<int,int>& PDGenealogy::findAncestor( int iGen,
 
 bool PDGenealogy::hasAncestors( int iGen, int ns,
                                 const PDGenealogy::TypeSelect** sel ) {
+
+  int moth = iGen;
+  while ( moth >= 0 ) {
+    iGen = moth;
+    moth = sameMother( iGen );
+  }
+
+/*
   int moth = genMother->at( iGen );
   while ( moth >= 0 ) {
     if ( genId->at( moth ) ==
@@ -257,6 +265,7 @@ bool PDGenealogy::hasAncestors( int iGen, int ns,
     }
     moth = genPartner->at( moth );
   }
+*/
 //  cout << "go on from " << iGen << " " << genId->at( iGen ) << endl;
   const PDGenealogy::TypeSelect& ts = **sel;
   int dmax = ts.dmax();
@@ -284,6 +293,34 @@ bool PDGenealogy::hasAncestors( int iGen, int ns,
   }
 //  cout << "got!" << ns << endl;
   return true;
+}
+
+
+int PDGenealogy::sameMother( int iGen ) {
+  int moth = genMother->at( iGen );
+  int type = genId->at( iGen );
+  while ( moth >= 0 ) {
+    if ( genId->at( moth ) == type ) return moth;
+    moth = genPartner->at( moth );
+  }
+  return -1;
+}
+
+
+int PDGenealogy::sameDaughter( int iGen ) {
+  const std::map< int, std::vector<int> >& ad = allDaughters();
+  std::map< int, std::vector<int> >::const_iterator iter = ad.find( iGen );
+  std::map< int, std::vector<int> >::const_iterator iend = ad.end();
+  if ( iter == iend ) return -1;
+  const std::vector<int>& dl = iter->second;
+  int type = genId->at( iGen );
+  int nd = dl.size();
+  int id;
+  int dp;
+  for ( id = 0; id < nd; ++id ) {
+    if ( genId->at( dp = dl[id] ) == type ) return dp;
+  }
+  return -1;
 }
 
 

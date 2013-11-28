@@ -30,12 +30,19 @@ class PDGenealogy: public virtual PDNtupleData {
   int ancestors( int iGen );
   class TypeSelect {
    public:
-    virtual bool operator()( int id ) const = 0;
+    TypeSelect() { sel = 0; }
+    TypeSelect( int id ) { sel = id; }
+    virtual bool operator()( int id ) const { return genId->at( id ) == sel; }
     virtual int dmax() const { return -1; }
     static std::vector<int>* genId;
+   private:
+    int sel;
   };
   std::multimap<int,int>& findAncestor( int iGen, const TypeSelect& sel );
   bool hasAncestors( int iGen, int ns, const TypeSelect** sel );
+
+  int sameMother( int iGen );
+  int sameDaughter( int iGen );
 
  private:
 
