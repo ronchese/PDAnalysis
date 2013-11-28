@@ -654,6 +654,8 @@ template <class T>
 void PDNtupleBranch<T>::setBranches_gpj() {
   // gen jets
   int size = 65536;
+  this->setBranch( "nGenJets"                 , &  nGenJets       ,
+                   "nGenJets/I"               , &b_nGenJets        );
   if ( use_gpj_sphe ) {
   this->setBranch( "gpjPt"                    , &  gpjPt          ,
                    size, 99                   , &b_gpjPt           );
