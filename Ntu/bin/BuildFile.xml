@@ -1,0 +1,9 @@
+<use   name="root"/>
+<use   name="boost"/>
+<use   name="rootcintex"/>
+<use   name="NtuTool/Common"/>
+<use   name="NtuTool/Read"/>
+<use   name="PDAnalysis/Ntu"/>
+<environment>
+  <bin   file="PDAnalyzerInstance.cc" name="treeAnalyze"></bin>
+</environment>

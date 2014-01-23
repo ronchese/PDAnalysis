@@ -1,0 +1,9 @@
+<use   name="root"/>
+<use   name="boost"/>
+<use   name="rootcintex"/>
+<use   name="NtuTool/Common"/>
+<use   name="NtuTool/Read"/>
+<use   name="PDAnalysis/EDM"/>
+<environment>
+  <bin   file="pdFWLite.cc" name="pdFWLite"></bin>
+</environment>

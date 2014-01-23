@@ -1,0 +1,24 @@
+<use   name="boost"/>
+<use   name="root"/>
+<use   name="rootgpad"/>
+<use   name="rootgraphics"/>
+<use   name="rootcore"/>
+<use   name="rootrflx"/>
+<use   name="rootcintex"/>
+<use   name="roothistmatrix"/>
+<use   name="CommonTools/Utils"/>
+<use   name="DataFormats/FWLite"/>
+<use   name="DataFormats/MuonReco"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="PhysicsTools/CandUtils"/>
+<use   name="PhysicsTools/FWLite"/>
+<use   name="NtuTool/Common"/>
+<use   name="NtuTool/Read"/>
+<use   name="PDAnalysis/Ntu"/>
+<use   name="PDAnalysis/EDM"/>
+<library   file="*.cc" name="PDAnalysisEDMPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>
