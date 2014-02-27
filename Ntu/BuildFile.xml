@@ -8,6 +8,7 @@
 <use   name="roothistmatrix"/>
 <use   name="NtuTool/Common"/>
 <use   name="NtuTool/Read"/>
+<flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
 <export>
   <lib   name="1"/>
 </export>
