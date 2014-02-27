@@ -4,6 +4,7 @@
 <use   name="NtuTool/Common"/>
 <use   name="NtuTool/Read"/>
 <use   name="PDAnalysis/EDM"/>
+<flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
 <environment>
   <bin   file="pdFWLite.cc" name="pdFWLite"></bin>
 </environment>
