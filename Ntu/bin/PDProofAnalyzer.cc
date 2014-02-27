@@ -22,7 +22,7 @@
 #include "PDAnalysis/Ntu/src/PDUtil.cc"
 #include "PDAnalysis/Ntu/src/PDNtuple.cc"
 #include "PDAnalysis/Ntu/src/PDEnumString.cc"
-#include "PDAnalysis/Ntu/src/PDGenealogy.cc"
+#include "PDAnalysis/Ntu/src/PDGenHandler.cc"
 #include "PDAnalysis/Ntu/bin/PDAnalyzer.cc"
 #include "TFile.h"
 #include "TChain.h"

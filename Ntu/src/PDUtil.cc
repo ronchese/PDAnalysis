@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <set>
 #include <math.h>
 
 #include "PDAnalysis/Ntu/interface/PDUtil.h"
@@ -10,6 +11,8 @@
 #include "TTree.h"
 #include "TCanvas.h"
 //#include "Math/LorentzVector.h"
+
+PDUtil::ObjectSelection PDUtil::dummySel;
 
 PDUtil::PDUtil() {
 }
@@ -332,20 +335,20 @@ PDUtil::number PDUtil::deltaR( number eta1, number phi1,
   return sqrt( ( etaD * etaD ) + ( phiD * phiD ) );
 }
 
-PDUtil::number PDUtil::modCart( number x, number y, number z ) {
-  return sqrt( ( x * x ) + ( y * y ) + ( z * z ) );
+PDUtil::number PDUtil::modSqua( number x, number y, number z ) {
+  return ( x * x ) + ( y * y ) + ( z * z );
 }
 
-PDUtil::number PDUtil::modSphe( number t, number e ) {
+PDUtil::number PDUtil::modSqua( number t, number e ) {
   number z = t / tan( 2 * atan( exp( -e ) ) );
-  return sqrt( ( t * t ) + ( z * z ) );
+  return ( t * t ) + ( z * z );
 }
 
 PDUtil::number PDUtil::angleCart( number x1, number y1, number z1,
                                   number x2, number y2, number z2 ) {
   number s = ( x1 * x2 ) + ( y1 * y2 ) + ( z1 * z2 );
   number p = modCart( x1, y1, z1 ) * modCart( x2, y2, z2 );
-  if ( p <= fabs( s ) ) return 0;
+  if ( fabs( p ) <= fabs( s ) ) return ( s * p > 0 ? 0 : M_PI );
   return acos( s / p );
 }
 
@@ -360,6 +363,131 @@ PDUtil::number PDUtil::angleSphe( number t1, number e1, number p1,
   convSpheCart( t1, e1, p1, x1, y1, z1 );
   convSpheCart( t2, e2, p2, x2, y2, z2 );
   return angleCart( x1, y1, z1, x2, y2, z2 );
+}
+
+PDUtil::number PDUtil::ptCart( number px, number py, number pz,
+                               number qx, number qy, number qz ) {
+  number s = ( px * qx ) + ( py * qy ) + ( pz * qz );
+  number p = modSqua( px, py, pz );
+  number q = modSqua( qx, qy, qz );
+//  number p = v * z;
+  number z = ( s * s ) / ( p * q );
+  number f = ( z < 1.0 ? sqrt( 1.0 - z ) : 0.0 );
+//  number f = ( p > fabs( s ) ? sqrt( 1.0 - ( ( s * s ) / ( p * q ) ) ) : 0.0 );
+  return sqrt( p ) * f;
+}
+
+PDUtil::number PDUtil::ptSphe( number pt, number pe, number pp,
+                                          number qe, number qp ) {
+  number px;
+  number py;
+  number pz;
+  number qx;
+  number qy;
+  number qz;
+  convSpheCart(  pt, pe, pp, px, py, pz );
+  convSpheCart( 1.0, qe, qp, qx, qy, qz );
+  return ptCart( px, py, pz, qx, qy, qz );
+}
+
+PDUtil::number PDUtil::plCart( number px, number py, number pz,
+                               number qx, number qy, number qz ) {
+  return ( ( px * qx ) + ( py * qy ) + ( pz * qz ) ) / modCart( qx, qy, qz );
+}
+
+PDUtil::number PDUtil::plSphe( number pt, number pe, number pp,
+                                          number qe, number qp ) {
+  number px;
+  number py;
+  number pz;
+  number qx;
+  number qy;
+  number qz;
+  convSpheCart(  pt, pe, pp, px, py, pz );
+  convSpheCart( 1.0, qe, qp, qx, qy, qz );
+  return plCart( px, py, pz, qx, qy, qz );
+}
+
+PDUtil::number PDUtil::transf( number  px, number  py,
+                               number  pz, number  ep,
+                               number  qx, number  qy,
+                               number  qz, number  eq,
+                               number& tx, number& ty,
+                               number& tz, number& et ) {
+  number s = ( px * qx ) + ( py * qy ) + ( pz * qz );
+  number p = modSqua( px, py, pz );
+  number q = modSqua( qx, qy, qz );
+  number z = ( s * s ) / ( p * q );
+  number f = ( z < 1.0 ? sqrt( 1.0 - z ) : 0.0 );
+  p = sqrt( p );
+  q = sqrt( q );
+//  std::cout << p << " " << q << std::endl;
+//  std::cout << ep << " " << eq << std::endl;
+  number b = q / eq;
+//  std::cout << b << std::endl;
+  number g = 1.0 / sqrt( 1.0 - ( b * b ) );
+//  std::cout << g << std::endl;
+  number pt = p * f;
+  number pl = s / q;
+//  std::cout << pt << " " << pl << std::endl;
+  number tl = g * ( pl - ( b * ep ) );
+//  std::cout << tl << std::endl;
+  number at = atan( pt / tl );
+//  std::cout << at << std::endl;
+  et = g * ( ep - ( b * pl ) );
+//  std::cout << et << std::endl;
+  if ( at < 0.0 ) at += M_PI;
+  tx = px + ( ( tl - pl ) * qx / q );
+  ty = py + ( ( tl - pl ) * qy / q );
+  tz = pz + ( ( tl - pl ) * qz / q );
+//  std::cout << "---->" << std::endl;
+  return at;
+}
+
+PDUtil::number PDUtil::ptCMin( number px, number py, number pz,
+                               number qx, number qy, number qz ) {
+  number s = ( px * qx ) + ( py * qy ) + ( pz * qz );
+  number p = modSqua( px, py, pz );
+  number q = modSqua( qx, qy, qz );
+  number t = p * q;
+  number f = ( fabs ( t ) > fabs( s ) ? sqrt( 1.0 - ( s * s / t ) ) : 1.0 );
+  return ( p < q ? sqrt( p ) * f : sqrt( q ) * f );
+}
+
+PDUtil::number PDUtil::ptSMin( number pt, number pe, number pp,
+                               number qt, number qe, number qp ) {
+  number px;
+  number py;
+  number pz;
+  number qx;
+  number qy;
+  number qz;
+  convSpheCart(  pt, pe, pp, px, py, pz );
+  convSpheCart( 1.0, qe, qp, qx, qy, qz );
+  return ptCMin( px, py, pz, qx, qy, qz );
+}
+
+PDUtil::number PDUtil::ptCMax( number px, number py, number pz,
+                               number qx, number qy, number qz ) {
+  number s = ( px * qx ) + ( py * qy ) + ( pz * qz );
+  number p = modSqua( px, py, pz );
+  number q = modSqua( qx, qy, qz );
+  number t = p * q;
+  number f = ( fabs ( t ) > fabs( s ) ? sqrt( 1.0 - ( s * s / t ) ) : 1.0 );
+  return ( p > q ? sqrt( p ) * f : sqrt( q ) * f );
+}
+
+PDUtil::number PDUtil::ptSMax( number pt, number pe, number pp,
+                               number qt, number qe, number qp ) {
+  number px;
+  number py;
+  number pz;
+  number qx;
+  number qy;
+  number qz;
+  convSpheCart(  pt, pe, pp, px, py, pz );
+  convSpheCart( 1.0, qe, qp, qx, qy, qz );
+  return ptCMax( px, py, pz, qx, qy, qz );
 }
 
 void PDUtil::convCartSphe( number  x, number  y, number  z,
@@ -427,6 +555,73 @@ void PDUtil::convSpheCart( const std::vector<number>* t,
   else {
     convSpheCart( t->at( i ), e->at( i ), p->at( i ),
                   x->at( i ), y->at( i ), z->at( i ) );
+  }
+  return;
+}
+
+
+void PDUtil::associateObjects( const std::vector<number>& lObjPt,
+                               const std::vector<number>& lObjEta,
+                               const std::vector<number>& lObjPhi,
+                               const std::vector<number>& lObjPx,
+                               const std::vector<number>& lObjPy,
+                               const std::vector<number>& lObjPz,
+                               const std::vector<number>& rObjPt,
+                               const std::vector<number>& rObjEta,
+                               const std::vector<number>& rObjPhi,
+                               const std::vector<number>& rObjPx,
+                               const std::vector<number>& rObjPy,
+                               const std::vector<number>& rObjPz,
+                               ObjectDistance& objDist,
+                               ObjectSelection& lObjSel,
+                               ObjectSelection& rObjSel,
+                               bool singleAssociation,
+                               std::vector<ObjectAssociation>& assoc ) {
+  int nl = lObjPt.size();
+  int nr = rObjPt.size();
+  int il;
+  int ir;
+  number lPt;
+  number lEta;
+  number lPhi;
+  number lPx;
+  number lPy;
+  number lPz;
+  number dMin;
+  number dCur;
+  int iAss;
+  ObjectAssociation noAss;
+  noAss.iObj = -1;
+  noAss.dist = objDist.dMax();
+  assoc.clear();
+  assoc.resize( nl, noAss );
+  std::set<int> used;
+  for ( il = 0; il < nl; ++il ) {
+    if ( !lObjSel( il ) ) continue;
+    iAss = -1;
+    dMin = objDist.dMax();
+    lPt  = lObjPt [il];
+    lEta = lObjEta[il];
+    lPhi = lObjPhi[il];
+    lPx  = lObjPx [il];
+    lPy  = lObjPy [il];
+    lPz  = lObjPz [il];
+    for ( ir = 0; ir < nr; ++ir ) {
+      if ( !rObjSel( ir ) ) continue;
+      if ( singleAssociation && ( used.find( ir ) != used.end() ) ) continue;
+      dCur = objDist(    lPt    ,     lEta    ,    lPhi,
+                         lPx    ,     lPy     ,    lPz,
+                      rObjPt [ir], rObjEta[ir], rObjPhi[ir],
+                      rObjPx [ir], rObjPy [ir], rObjPz [ir] );
+      if ( dCur < dMin ) {
+        iAss = ir;
+        dMin = dCur;
+      }
+    }
+    if ( iAss < 0 ) continue;
+    used.insert( iAss );
+    assoc[il].dist = dMin;
+    assoc[il].iObj = iAss;
   }
   return;
 }

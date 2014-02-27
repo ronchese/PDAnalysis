@@ -3,10 +3,10 @@
 
 #include "TH1.h"
 #include "PDAnalyzerUtil.h"
-#include "PDAnalysis/Ntu/interface/PDGenealogy.h"
+#include "PDAnalysis/Ntu/interface/PDGenHandler.h"
 
 class PDAnalyzer: public virtual PDAnalyzerUtil,
-                  public virtual PDGenealogy {
+                  public virtual PDGenHandler {
 
  public:
 

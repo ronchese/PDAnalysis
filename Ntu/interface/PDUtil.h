@@ -2,6 +2,13 @@
 #define PDUtil_H
 
 #include "PDAnalysis/Ntu/interface/PDNtupleData.h"
+#include "map"
+#include "math.h"
+
+//
+// PDNtupleData is used only to get number typedef
+// any other utility based on ntuple structure must stay elsewhere
+//
 
 class PDUtil: public virtual PDNtupleData {
 
@@ -62,13 +69,57 @@ class PDUtil: public virtual PDNtupleData {
   static number deltaR( number eta1, number phi1,
                         number eta2, number phi2 );
 
-  static number modCart( number x, number y, number z );
-  static number modSphe( number t, number e );
+  static number modSqua( number x, number y, number z );
+  static number modSqua( number t, number e );
+  static number modCart( number x, number y, number z )
+    { return sqrt( modSqua( x, y, z ) ); }
+  static number modSphe( number t, number e )
+    { return sqrt( modSqua( t, e ) ); }
 
   static number angleCart( number x1, number y1, number z1,
                            number x2, number y2, number z2 );
   static number angleSphe( number t1, number e1, number p1,
                            number t2, number e2, number p2 );
+  static number angle( number x1, number y1, number z1,
+                       number x2, number y2, number z2 ) 
+    { return angleCart( x1, y1, z1, x2, y2, z2 ); }
+  static number angle( number e1, number p1,
+                       number e2, number p2 )
+    { return angleSphe( 1.0, e1, p1, 1.0, e2, p2 ); }
+
+  static number ptCart( number px, number py, number pz,
+                        number qx, number qy, number qz );
+  static number ptSphe( number pt, number pe, number pp,
+                                   number qe, number qp );
+  static number ptRel ( number px, number py, number pz,
+                        number qx, number qy, number qz )
+    { return ptCart( px, py, pz, qx, qy, qz ); }
+  static number ptRel ( number pt, number pe, number pp,
+                                   number qe, number qp )
+    { return ptSphe( pt, pe, pp, qe, qp ); }
+  static number plCart( number px, number py, number pz,
+                        number qx, number qy, number qz );
+  static number plSphe( number pt, number pe, number pp,
+                                   number qe, number qp );
+  static number plRel ( number px, number py, number pz,
+                        number qx, number qy, number qz )
+    { return plCart( px, py, pz, qx, qy, qz ); }
+  static number plRel ( number pt, number pe, number pp,
+                                   number qe, number qp )
+    { return plSphe( pt, pe, pp, qe, qp ); }
+
+  static number transf( number  px, number  py, number  pz, number  ep,
+                        number  qx, number  qy, number  qz, number  eq,
+                        number& tx, number& ty, number& tz, number& et );
+
+  static number ptCMin( number px, number py, number pz,
+                        number qx, number qy, number qz );
+  static number ptSMin( number pt, number pe, number pp,
+                        number qt, number qe, number qp );
+  static number ptCMax( number px, number py, number pz,
+                        number qx, number qy, number qz );
+  static number ptSMax( number pt, number pe, number pp,
+                        number qt, number qe, number qp );
 
   static void convCartSphe( number  x, number  y, number  z,
                             number& t, number& e, number& p );
@@ -87,12 +138,77 @@ class PDUtil: public virtual PDNtupleData {
                                   std::vector<number>* y,
                                   std::vector<number>* z, int i = -1 );
 
+  struct ObjectAssociation {
+    int iObj;
+    float dist;
+  };
+  class ObjectSelection {
+   public:
+    virtual bool operator()( int obj ) { return true; }
+  };
+  static ObjectSelection dummySel;
+  class ObjectDistance {
+   public:
+    virtual number operator()( number lObjPt , number lObjEta, number lObjPhi,
+                               number lObjPx , number lObjPy , number lObjPz ,
+                               number rObjPt , number rObjEta, number rObjPhi,
+                               number rObjPx , number rObjPy , number rObjPz  )
+                               = 0;
+    virtual number dMax() { return 1.0e+37; }
+  };
+  static void associateObjects( const std::vector<number>& lObjPt,
+                                const std::vector<number>& lObjEta,
+                                const std::vector<number>& lObjPhi,
+                                const std::vector<number>& lObjPx,
+                                const std::vector<number>& lObjPy,
+                                const std::vector<number>& lObjPz,
+                                const std::vector<number>& rObjPt,
+                                const std::vector<number>& rObjEta,
+                                const std::vector<number>& rObjPhi,
+                                const std::vector<number>& rObjPx,
+                                const std::vector<number>& rObjPy,
+                                const std::vector<number>& rObjPz,
+                                ObjectDistance& objDist,
+                                ObjectSelection& lObjSel,
+                                ObjectSelection& rObjSel,
+                                bool singleAssociation,
+                                std::vector<ObjectAssociation>& assoc );
+
  private:
 
   // dummy copy and assignment constructors
   PDUtil( const PDUtil& );
   PDUtil& operator=( const PDUtil& );
 
+};
+
+
+template<class Key,class Val>
+class ConstMap {
+ public:
+  ConstMap<Key,Val>() { cmp = 0; }
+  ConstMap<Key,Val>( const Val& v ) { cmp = 0; val = v; }
+  ConstMap<Key,Val>( const std::map<Key,Val>& map ) { cmp = &map; }
+  ConstMap<Key,Val>( const std::map<Key,Val>& map, const Val& v ) {
+    cmp = &map; val = v; }
+  const Val& operator[]( Key key ) {
+    if ( cmp == 0 ) return val;
+    typename std::map<Key,Val>::const_iterator iter = cmp->find( key );
+    typename std::map<Key,Val>::const_iterator iend = cmp->end();
+    if ( iter != iend ) return iter->second;
+    return val;
+  }
+  ConstMap& operator=( ConstMap& map ) {
+    cmp = map.cmp;
+    return *this;
+  }
+  ConstMap& operator=( const std::map<Key,Val>& map ) {
+    cmp = &map;
+    return *this;
+  }
+ private:
+  const std::map<Key,Val>* cmp;
+  Val val;
 };
 
 

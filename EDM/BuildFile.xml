@@ -24,6 +24,7 @@
 <use   name="NtuTool/Common"/>
 <use   name="NtuTool/Read"/>
 <use   name="PDAnalysis/Ntu"/>
+<flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
 <export>
   <lib   name="1"/>
 </export>

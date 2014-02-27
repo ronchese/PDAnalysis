@@ -13,7 +13,7 @@
 #include "PDAnalysis/Ntu/src/PDEventSelect.cc"
 #include "PDAnalysis/Ntu/src/PDEnumString.cc"
 #include "PDAnalysis/Ntu/src/PDUtil.cc"
-#include "PDAnalysis/Ntu/src/PDGenealogy.cc"
+#include "PDAnalysis/Ntu/src/PDGenHandler.cc"
 #include "PDLightNtuple.cc"
 #include "PDAnalyzer.cc"
 #include "TFile.h"
