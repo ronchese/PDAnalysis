@@ -19,6 +19,7 @@
 <use   name="NtuTool/Read"/>
 <use   name="PDAnalysis/Ntu"/>
 <use   name="PDAnalysis/EDM"/>
+<flags CXXFLAGS="-Wno-delete-non-virtual-dtor"/>
 <library   file="*.cc" name="PDAnalysisEDMPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
