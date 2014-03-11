@@ -41,6 +41,7 @@ class PDGenHandler: public virtual PDNtupleData,
    public:
     TypeSelect() { sel = 0; m = '\0'; }
     TypeSelect( int id, char mode = 't' ) { sel = id; m = mode; }
+    virtual ~TypeSelect() {}
     virtual bool operator()( int id ) const {
       switch ( m ) {
       case 't': return genId->at( id ) == sel;
@@ -130,6 +131,7 @@ class PDGenHandler: public virtual PDNtupleData,
 class IsLepton: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  11 ) return true;
     if ( id == -11 ) return true;
@@ -142,6 +144,7 @@ class IsLepton: public PDGenHandler::TypeSelect {
 class IsMuon: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  13 ) return true;
     if ( id == -13 ) return true;
@@ -152,6 +155,7 @@ class IsMuon: public PDGenHandler::TypeSelect {
 class IsElectron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  11 ) return true;
     if ( id == -11 ) return true;
@@ -162,6 +166,7 @@ class IsElectron: public PDGenHandler::TypeSelect {
 class IsW: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  24 ) return true;
     if ( id == -24 ) return true;
@@ -172,6 +177,7 @@ class IsW: public PDGenHandler::TypeSelect {
 class IsDirectW: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  24 ) return true;
     if ( id == -24 ) return true;
@@ -183,6 +189,7 @@ class IsDirectW: public PDGenHandler::TypeSelect {
 class IsTau: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  15 ) return true;
     if ( id == -15 ) return true;
@@ -193,6 +200,7 @@ class IsTau: public PDGenHandler::TypeSelect {
 class IsDirectTau: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  15 ) return true;
     if ( id == -15 ) return true;
@@ -201,9 +209,25 @@ class IsDirectTau: public PDGenHandler::TypeSelect {
   virtual int dmax() const { return 1; }
 };
 
+class IsHadron: public PDGenHandler::TypeSelect {
+ public:
+  virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
+    int id = genId->at( iGen );
+    if ( id < 0 ) id = -id;
+    id %= 10000;
+    id /= 100;
+    if ( ( id >=1 ) && ( id <= 5 ) ) return true;
+    id /= 10;
+    if ( ( id >=1 ) && ( id <= 5 ) ) return true;
+    return false;
+  }
+};
+
 class IsBHadron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < 0 ) id = -id;
     id %= 10000;
@@ -216,6 +240,7 @@ class IsBHadron: public PDGenHandler::TypeSelect {
 class IsDirectBHadron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < 0 ) id = -id;
     id %= 10000;
@@ -229,6 +254,7 @@ class IsDirectBHadron: public PDGenHandler::TypeSelect {
 class IsBQuark: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  5 ) return true;
     if ( id == -5 ) return true;
@@ -239,6 +265,7 @@ class IsBQuark: public PDGenHandler::TypeSelect {
 class IsCHadron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < 0 ) id = -id;
     id %= 10000;
@@ -251,6 +278,7 @@ class IsCHadron: public PDGenHandler::TypeSelect {
 class IsDirectCHadron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < 0 ) id = -id;
     id %= 10000;
@@ -264,6 +292,7 @@ class IsDirectCHadron: public PDGenHandler::TypeSelect {
 class IsCQuark: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  4 ) return true;
     if ( id == -4 ) return true;
@@ -274,6 +303,7 @@ class IsCQuark: public PDGenHandler::TypeSelect {
 class IsLHadron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < 0 ) id = -id;
     if ( id < 100 ) return false;
@@ -287,6 +317,7 @@ class IsLHadron: public PDGenHandler::TypeSelect {
 class IsDirectLHadron: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < 0 ) id = -id;
     if ( id < 100 ) return false;
@@ -301,6 +332,7 @@ class IsDirectLHadron: public PDGenHandler::TypeSelect {
 class IsLQuark: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < -3 ) return false;
     if ( id >  3 ) return false;
@@ -311,6 +343,7 @@ class IsLQuark: public PDGenHandler::TypeSelect {
 class IsQuarkNoBeauty: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < -4 ) return false;
     if ( id >  4 ) return false;
@@ -321,6 +354,7 @@ class IsQuarkNoBeauty: public PDGenHandler::TypeSelect {
 class IsQuarkNoTop: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < -5 ) return false;
     if ( id >  5 ) return false;
@@ -331,6 +365,7 @@ class IsQuarkNoTop: public PDGenHandler::TypeSelect {
 class IsQuark: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id < -6 ) return false;
     if ( id >  6 ) return false;
@@ -341,6 +376,7 @@ class IsQuark: public PDGenHandler::TypeSelect {
 class IsTQuark: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  6 ) return true;
     if ( id == -6 ) return true;
@@ -351,6 +387,7 @@ class IsTQuark: public PDGenHandler::TypeSelect {
 class IsDirectTQuark: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  6 ) return true;
     if ( id == -6 ) return true;
@@ -362,6 +399,7 @@ class IsDirectTQuark: public PDGenHandler::TypeSelect {
 class IsNotTop: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id ==  6 ) return false;
     if ( id == -6 ) return false;
@@ -372,6 +410,7 @@ class IsNotTop: public PDGenHandler::TypeSelect {
 class IsGluon: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id != 21 ) return false;
     return true;
@@ -381,6 +420,7 @@ class IsGluon: public PDGenHandler::TypeSelect {
 class IsString: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id != 92 ) return false;
     return true;
@@ -390,6 +430,7 @@ class IsString: public PDGenHandler::TypeSelect {
 class IsCluster: public PDGenHandler::TypeSelect {
  public:
   virtual bool operator()( int iGen ) const {
+    if ( iGen < 0 ) return false;
     int id = genId->at( iGen );
     if ( id != 91 ) return false;
     return true;
@@ -403,6 +444,7 @@ extern const IsW             isW            ;
 extern const IsDirectW       isDirectW      ;
 extern const IsTau           isTau          ;
 extern const IsDirectTau     isDirectTau    ;
+extern const IsHadron        isHadron       ;
 extern const IsBHadron       isBHadron      ;
 extern const IsDirectBHadron isDirectBHadron;
 extern const IsBQuark        isBQuark       ;

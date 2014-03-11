@@ -509,14 +509,26 @@ void PDGenHandler::associateJet( ObjectDistance& dist ) {
   class SelectQuark: public ObjectSelection {
    public:
     virtual bool operator()( int obj ) {
+/*
       if ( isQuark( obj ) ) return true;
 //      if ( isGluon( obj ) ) {
-//	if ( genE->at( obj ) > 10.0 ) return true;
+//        if ( genE->at( obj ) > 10.0 ) return true;
 //      }
       return false;
+*/
+      if ( !isQuark( obj ) ) return false;
+      const std::vector<int>& daug = gh->allDaughters( obj );
+      int iDaug;
+      int nDaug = daug.size();
+      for ( iDaug = 0; iDaug < nDaug; ++iDaug ) {
+        if ( isQuark( daug[iDaug] ) ) return false;
+      }
+      return true;
     }
+    PDGenHandler* gh;
     const std::vector<number>* genE;
   } qsel;
+  qsel.gh = this;
   qsel.genE = genE;
   associateObjects( *jetPt, *jetEta, *jetPhi, *jetPx, *jetPy, *jetPz,
                     *genPt, *genEta, *genPhi, *genPx, *genPy, *genPz,
@@ -667,6 +679,7 @@ const IsW             isW            ;
 const IsDirectW       isDirectW      ;
 const IsTau           isTau          ;
 const IsDirectTau     isDirectTau    ;
+const IsHadron        isHadron       ;
 const IsBHadron       isBHadron      ;
 const IsDirectBHadron isDirectBHadron;
 const IsBQuark        isBQuark       ;

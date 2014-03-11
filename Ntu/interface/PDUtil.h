@@ -144,11 +144,13 @@ class PDUtil: public virtual PDNtupleData {
   };
   class ObjectSelection {
    public:
+    virtual ~ObjectSelection() {}
     virtual bool operator()( int obj ) { return true; }
   };
   static ObjectSelection dummySel;
   class ObjectDistance {
    public:
+    virtual ~ObjectDistance() {}
     virtual number operator()( number lObjPt , number lObjEta, number lObjPhi,
                                number lObjPx , number lObjPy , number lObjPz ,
                                number rObjPt , number rObjEta, number rObjPhi,
